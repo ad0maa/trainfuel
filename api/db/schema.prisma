@@ -196,6 +196,18 @@ model ScheduledItem {
   recurrenceRule String? // RFC5545 RRULE string, null for one-off
   status         ItemStatus @default(PLANNED)
 
+  // ── Recurrence template/instance distinction (M1 addition, see DECISIONS.md) ──
+  // A "template" row carries `recurrenceRule` + `isTemplate: true`, is never
+  // shown on the Today screen, and is not itself completable. A nightly job
+  // (api/src/lib/scheduling/materializeRecurringItems.ts) expands it into
+  // concrete "instance" rows (isTemplate: false, templateId set, no
+  // recurrenceRule) for the next 14 days. The template's own `scheduledAt`
+  // is the RRULE anchor (DTSTART + time-of-day).
+  isTemplate Boolean         @default(false)
+  templateId String?
+  template   ScheduledItem?  @relation("TemplateInstances", fields: [templateId], references: [id], onDelete: SetNull)
+  instances  ScheduledItem[] @relation("TemplateInstances")
+
   // prescription payload, type-specific (run pace targets, lift exercise list, dose mg)
   prescription Json?
 
@@ -209,8 +221,10 @@ model ScheduledItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([templateId, scheduledAt])
   @@index([userId, scheduledAt])
   @@index([userId, type, status])
+  @@index([isTemplate])
 }
 
 // ─────────────────────────────────────────────────────────────────────────

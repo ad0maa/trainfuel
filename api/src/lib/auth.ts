@@ -36,7 +36,10 @@ export const getCurrentUser = async (session: Decoded) => {
 
   return await db.user.findUnique({
     where: { id: session.id },
-    select: { id: true },
+    // `email` included alongside `id` since several M1+ services/UI expect
+    // `context.currentUser.email` to be available (e.g. for display); safe
+    // to expose per the comment above (not a secret field).
+    select: { id: true, email: true },
   })
 }
 

@@ -1,5 +1,6 @@
 .idea
 .DS_Store
+.claude/
 .env*
 !.env.example
 !.env.defaults
