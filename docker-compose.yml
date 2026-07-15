@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trainfuel
+      POSTGRES_PASSWORD: trainfuel
+      POSTGRES_DB: trainfuel_dev
+    ports:
+      - '5544:5432'
+    volumes:
+      - trainfuel_pg_data:/var/lib/postgresql/data
+
+volumes:
+  trainfuel_pg_data:

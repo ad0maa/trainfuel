@@ -1,0 +1,438 @@
+// Don't forget to tell Prisma about your edits to this file using
+// `yarn cedar prisma migrate dev` or `yarn cedar prisma db push`.
+// `migrate` is like committing while `push` is for prototyping.
+// Read more about both here:
+// https://www.prisma.io/docs/orm/prisma-migrate
+
+datasource db {
+  provider = "postgresql"
+}
+
+// This specific combination of settings is the only way to make Prisma 7 work
+// in both CJS and ESM Cedar apps.
+// See https://github.com/cedarjs/cedar/pull/1761 for more info
+generator client {
+  provider               = "prisma-client"
+  output                 = "./generated/prisma"
+  moduleFormat           = "cjs"
+  generatedFileExtension = "mts"
+  importFileExtension    = "mts"
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+// Non-exercise activity baseline multiplier applied to BMR (§6.2). Values are
+// standard Mifflin-St Jeor activity-factor tiers; only SEDENTARY is used by
+// the v1 energy module's default, but the full tier set is modeled so the
+// profile UI can offer a normal activity-level picker.
+enum ActivityBaseline {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum BlockPhase {
+  REBUILD
+  BUILD
+  TAPER
+  MAINTENANCE
+}
+
+enum ScheduledItemType {
+  RUN
+  LIFT
+  MEDICATION
+  SUPPLEMENT
+  OTHER
+}
+
+enum ItemStatus {
+  PLANNED
+  COMPLETED
+  SKIPPED
+  MOVED
+}
+
+enum CompletionSource {
+  STRAVA
+  HEVY
+  HEALTHKIT
+  MANUAL
+}
+
+enum MatchConfidence {
+  EXACT
+  FUZZY
+  MANUAL
+}
+
+enum FoodSource {
+  AFCD
+  OFF
+  USDA
+  CUSTOM
+}
+
+enum MealSlot {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+enum LogUnit {
+  SERVING
+  GRAM
+}
+
+enum Provider {
+  STRAVA
+  HEVY
+  GOOGLE_CALENDAR
+}
+
+// v2 kinds (RESTING_HR, HRV, SLEEP) enumerated now per spec §4.5 so the
+// HealthSample ingestion pipeline doesn't need a migration to add them later.
+enum HealthKind {
+  BODY_MASS
+  ACTIVE_ENERGY
+  RESTING_HR
+  HRV
+  SLEEP
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3.1 Core identity & profile
+// ─────────────────────────────────────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  hashedPassword      String
+  salt                String
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  profile             Profile?
+  trainingBlocks      TrainingBlock[]
+  scheduledItems      ScheduledItem[]
+  completions         Completion[]
+  externalActivities  ExternalActivity[]
+  foodLogEntries      FoodLogEntry[]
+  recipes             Recipe[]
+  customFoods         Food[]               @relation("FoodCreatedBy")
+  dailyMetrics        DailyMetric[]
+  integrationAccounts IntegrationAccount[]
+  healthSamples       HealthSample[]
+}
+
+model Profile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sex       Sex
+  birthDate DateTime
+  heightCm  Float
+
+  // goal config
+  goalWeightKg         Float?
+  weeklyWeightDeltaKg  Float? // e.g. -0.4 for deficit pacing
+  activityBaseline     ActivityBaseline @default(SEDENTARY) // non-exercise base only, see §6
+  proteinTargetGPerDay Float? // explicit override; else computed
+  timezone             String           @default("Australia/Melbourne")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3.2 Training plan structure
+// ─────────────────────────────────────────────────────────────────────────
+
+model TrainingBlock {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String // "Geelong HM — Build"
+  phase     BlockPhase
+  startDate DateTime
+  endDate   DateTime
+  notes     String?
+
+  sessions ScheduledItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startDate])
+}
+
+model ScheduledItem {
+  id      String         @id @default(cuid())
+  userId  String
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blockId String? // null for standalone items (meds, ad-hoc sessions)
+  block   TrainingBlock? @relation(fields: [blockId], references: [id], onDelete: SetNull)
+
+  type        ScheduledItemType
+  title       String // "W4 Tue: 6×800m intervals" / "Creatine 5g"
+  description String? // full prescription text (paces, sets/reps, dose)
+  scheduledAt DateTime // tz-aware; the planned start (stored as UTC instant)
+  durationMin Int?
+
+  // recurrence for meds/supps (sessions are generated concretely, not recurring)
+  recurrenceRule String? // RFC5545 RRULE string, null for one-off
+  status         ItemStatus @default(PLANNED)
+
+  // prescription payload, type-specific (run pace targets, lift exercise list, dose mg)
+  prescription Json?
+
+  // calendar sync
+  gcalEventId    String?
+  gcalSyncedAt   DateTime?
+  pushToCalendar Boolean   @default(false) // meds/supps opt-in override, see §4.3
+
+  completion Completion?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, scheduledAt])
+  @@index([userId, type, status])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3.3 Completion & external activity ingestion
+// ─────────────────────────────────────────────────────────────────────────
+
+model Completion {
+  id              String        @id @default(cuid())
+  scheduledItemId String        @unique
+  scheduledItem   ScheduledItem @relation(fields: [scheduledItemId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  completedAt        DateTime
+  source             CompletionSource
+  matchConfidence    MatchConfidence   @default(EXACT)
+  externalActivityId String?
+  externalActivity   ExternalActivity? @relation(fields: [externalActivityId], references: [id], onDelete: SetNull)
+  notes              String? // "hammy tight last 2km"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, completedAt])
+}
+
+model ExternalActivity {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source       CompletionSource // STRAVA | HEVY | HEALTHKIT
+  externalId   String // provider's id
+  activityType String // Run, WeightTraining, ...
+  startedAt    DateTime
+  durationSec  Int?
+  distanceM    Float?
+  energyKcal   Float? // provider-reported, raw (haircut applied at calc time, not storage)
+  raw          Json // full provider payload — always store
+
+  // Hevy detail lives in raw + normalized children:
+  exercises   ExternalExercise[]
+  completions Completion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([userId, startedAt])
+}
+
+// normalized Hevy sets for progression charts
+model ExternalExercise {
+  id         String           @id @default(cuid())
+  activityId String
+  activity   ExternalActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  name       String // "Leg Press"
+  order      Int
+  sets       Json // [{reps, weightKg, rpe?}, ...]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([activityId, order])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3.4 Nutrition
+// ─────────────────────────────────────────────────────────────────────────
+
+model Food {
+  id         String     @id @default(cuid())
+  name       String
+  brand      String?
+  source     FoodSource // AFCD | OFF | USDA | CUSTOM
+  externalId String? // AFCD key / OFF barcode / FDC id
+  barcode    String?
+
+  // canonical nutrients PER 100 g (or per 100 ml, flagged)
+  per100   Json // { kcal, proteinG, carbsG, fatG, fibreG?, sugarG?, sodiumMg?, ... }
+  isLiquid Boolean @default(false)
+
+  servings   FoodServing[]
+  logEntries FoodLogEntry[]
+
+  verified        Boolean @default(false) // AFCD/USDA true; OFF false until user-confirmed
+  createdByUserId String?
+  createdByUser   User?   @relation("FoodCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([barcode])
+  @@index([name])
+}
+
+model FoodServing {
+  id     String @id @default(cuid())
+  foodId String
+  food   Food   @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  label  String // "1 slice", "1 cup cooked", "1 scoop"
+  grams  Float
+
+  logEntries FoodLogEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([foodId])
+}
+
+model FoodLogEntry {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  foodId    String
+  food      Food         @relation(fields: [foodId], references: [id])
+  loggedFor DateTime // the DAY it counts toward (local date, stored as date-only)
+  meal      MealSlot
+  quantity  Float // number of servings OR grams
+  unit      LogUnit // SERVING | GRAM
+  servingId String?
+  serving   FoodServing? @relation(fields: [servingId], references: [id], onDelete: SetNull)
+
+  // denormalized computed nutrients at log time (immutable snapshot —
+  // protects history if the Food row is later corrected)
+  nutrients Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, loggedFor])
+}
+
+// saved meals — "my usual breakfast"
+model Recipe {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+  items  Json // [{foodId, quantity, unit, servingId?}]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3.5 Daily rollups (required for TDEE Level 3 later)
+// ─────────────────────────────────────────────────────────────────────────
+
+model DailyMetric {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date   DateTime // local date (date-only)
+
+  weightKg       Float? // latest HealthKit weight for the day
+  intakeKcal     Float? // rolled up from FoodLogEntry
+  intakeProteinG Float?
+  intakeCarbsG   Float?
+  intakeFatG     Float?
+
+  exerciseKcalRaw     Float? // sum of provider-reported exercise energy
+  activeEnergyKcalRaw Float? // HealthKit active energy (whole-day)
+
+  targetKcal     Float? // what the app told the user that day (audit trail)
+  targetProteinG Float?
+  targetCarbsG   Float?
+  targetFatG     Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 3.6 Integrations & health ingestion
+// ─────────────────────────────────────────────────────────────────────────
+
+model IntegrationAccount {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider Provider // STRAVA | HEVY | GOOGLE_CALENDAR
+
+  // Strava/Google: OAuth tokens. Hevy: personal API key.
+  // SECURITY: values are encrypted at rest (AES-256-GCM, see api/src/lib/crypto.ts)
+  // before being written to these columns, and never returned raw through GraphQL.
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  apiKey       String?
+  scope        String?
+  meta         Json? // athlete id, calendar id, etc.
+
+  status       String? // e.g. "OK" | "EXPIRED" | "ERROR" — surfaced in Settings, see §9
+  statusDetail String?
+  lastSyncedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, provider])
+}
+
+// raw HealthKit ingestion from mobile
+model HealthSample {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      HealthKind // BODY_MASS | ACTIVE_ENERGY | RESTING_HR | HRV | SLEEP (v2 kinds fine to enumerate now)
+  value     Float
+  unit      String
+  sampledAt DateTime
+  sourceId  String // HealthKit UUID — dedupe key
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, kind, sourceId])
+  @@index([userId, kind, sampledAt])
+}
