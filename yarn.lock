@@ -1839,6 +1839,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cedarjs/cli-data-migrate@npm:5.0.0":
+  version: 5.0.0
+  resolution: "@cedarjs/cli-data-migrate@npm:5.0.0"
+  dependencies:
+    "@cedarjs/babel-config": "npm:5.0.0"
+    "@cedarjs/cli-helpers": "npm:5.0.0"
+    "@cedarjs/project-config": "npm:5.0.0"
+    bundle-require: "npm:^5.1.0"
+    dotenv-defaults: "npm:5.0.2"
+    execa: "npm:5.1.1"
+    listr2: "npm:10.2.1"
+    termi-link: "npm:1.1.0"
+    yargs: "npm:17.7.2"
+  bin:
+    up: dist/bin.js
+  checksum: 10c0/565a1900f3cd3e6a2d961b794580bb353c195488d457a767983e02764d691aa5e5096dd111cd008a1c100c2efa947f7d4472560af2dc735c3e2792a006c02e09
+  languageName: node
+  linkType: hard
+
 "@cedarjs/cli-helpers@npm:5.0.0":
   version: 5.0.0
   resolution: "@cedarjs/cli-helpers@npm:5.0.0"
@@ -8410,6 +8429,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bundle-require@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "bundle-require@npm:5.1.0"
+  dependencies:
+    load-tsconfig: "npm:^0.2.3"
+  peerDependencies:
+    esbuild: ">=0.18"
+  checksum: 10c0/8bff9df68eb686f05af952003c78e70ffed2817968f92aebb2af620cc0b7428c8154df761d28f1b38508532204278950624ef86ce63644013dc57660a9d1810f
+  languageName: node
+  linkType: hard
+
 "busboy@npm:^1.6.0":
   version: 1.6.0
   resolution: "busboy@npm:1.6.0"
@@ -13724,6 +13754,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"load-tsconfig@npm:^0.2.3":
+  version: 0.2.5
+  resolution: "load-tsconfig@npm:0.2.5"
+  checksum: 10c0/bf2823dd26389d3497b6567f07435c5a7a58d9df82e879b0b3892f87d8db26900f84c85bc329ef41c0540c0d6a448d1c23ddc64a80f3ff6838b940f3915a3fcb
+  languageName: node
+  linkType: hard
+
 "local-pkg@npm:^1.1.1, local-pkg@npm:^1.1.2":
   version: 1.2.1
   resolution: "local-pkg@npm:1.2.1"
@@ -16679,6 +16716,7 @@ __metadata:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@cedarjs/auth-dbauth-setup": "npm:5.0.0"
+    "@cedarjs/cli-data-migrate": "npm:5.0.0"
     "@cedarjs/core": "npm:5.0.0"
     "@cedarjs/eslint-config": "npm:5.0.0"
     "@cedarjs/project-config": "npm:5.0.0"

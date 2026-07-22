@@ -7,6 +7,7 @@
   ],
   "devDependencies": {
     "@cedarjs/auth-dbauth-setup": "5.0.0",
+    "@cedarjs/cli-data-migrate": "5.0.0",
     "@cedarjs/core": "5.0.0",
     "@cedarjs/eslint-config": "5.0.0",
     "@cedarjs/project-config": "5.0.0",
