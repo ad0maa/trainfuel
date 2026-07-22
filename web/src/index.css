@@ -41,6 +41,11 @@ body {
   margin: 0;
 }
 
+.tf-page-nav {
+  display: flex;
+  gap: 1rem;
+}
+
 .tf-nav-link {
   color: var(--tf-accent);
   text-decoration: none;
@@ -57,8 +62,96 @@ body {
   padding: 1rem 0;
 }
 
-.tf-macro-ring-slot {
-  min-height: 0;
+.tf-energy-summary {
+  background: var(--tf-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.tf-energy-summary--incomplete {
+  color: var(--tf-text-muted);
+  display: block;
+}
+
+.tf-energy-ring {
+  --tf-ring-pct: 0%;
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: conic-gradient(
+    var(--tf-accent) var(--tf-ring-pct),
+    var(--tf-accent-soft) var(--tf-ring-pct)
+  );
+}
+
+.tf-energy-ring-fill {
+  position: absolute;
+  inset: 8px;
+  background: var(--tf-surface);
+  border-radius: 50%;
+}
+
+.tf-energy-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.tf-energy-ring-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tf-energy-ring-label {
+  font-size: 0.65rem;
+  color: var(--tf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tf-macro-list {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.tf-macro-list div {
+  display: flex;
+  flex-direction: column;
+}
+
+.tf-macro-list dt {
+  font-size: 0.7rem;
+  color: var(--tf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tf-macro-list dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tf-energy-note {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--tf-danger);
+  font-size: 0.85rem;
 }
 
 .tf-item-list,
@@ -255,4 +348,94 @@ button:disabled {
 
 .tf-button--secondary {
   background: transparent;
+}
+
+.tf-date-nav {
+  margin-bottom: 1rem;
+}
+
+.tf-meal-section {
+  margin-bottom: 1.25rem;
+}
+
+.tf-meal-section h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.tf-food-entry-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tf-food-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--tf-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  padding: 0.6rem 0.85rem;
+}
+
+.tf-food-entry-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.tf-food-entry-qty,
+.tf-food-entry-kcal {
+  color: var(--tf-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tf-food-search {
+  max-width: 480px;
+}
+
+.tf-food-search input[type='search'] {
+  width: 100%;
+  border: 1px solid var(--tf-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+}
+
+.tf-food-search-results {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.tf-food-search-results button {
+  width: 100%;
+  text-align: left;
+  background: var(--tf-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+.tf-unverified-hint {
+  color: var(--tf-text-muted);
+  font-size: 0.8rem;
+}
+
+.tf-log-entry-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
 }

@@ -4,8 +4,18 @@
 // Read more about both here:
 // https://www.prisma.io/docs/orm/prisma-migrate
 
+// `extensions = [pg_trgm]` is declared here (in addition to the raw-SQL
+// migration `20260716120100_add_pg_trgm_food_name_index`, which owns the
+// actual GIN index) specifically so `prisma db push` — which Cedar's test
+// runner uses for the test DB and does NOT replay raw-SQL migrations —
+// still creates the pg_trgm extension itself. Without this, `similarity()`
+// calls in api/src/services/foods/foods.ts would work in dev/prod (via
+// `migrate deploy`) but throw "function similarity does not exist" in every
+// test run. The GIN index is a production performance concern only; tests
+// don't need it, just the extension/function to exist. See DECISIONS.md.
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [pg_trgm]
 }
 
 // This specific combination of settings is the only way to make Prisma 7 work
@@ -17,6 +27,7 @@ generator client {
   moduleFormat           = "cjs"
   generatedFileExtension = "mts"
   importFileExtension    = "mts"
+  previewFeatures        = ["postgresqlExtensions"]
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -152,6 +163,13 @@ model Profile {
   activityBaseline     ActivityBaseline @default(SEDENTARY) // non-exercise base only, see §6
   proteinTargetGPerDay Float? // explicit override; else computed
   timezone             String           @default("Australia/Melbourne")
+
+  // SPEC.md §6.1's BMR weight input falls back to "profile-entered weight"
+  // when there's no DailyMetric.weightKg yet — but the spec's own Profile
+  // outline never actually defines that field. Added in M2; see
+  // DECISIONS.md "Schema gap fix" for the full rationale. Additive/nullable,
+  // so it's a no-op for any existing Profile rows.
+  currentWeightKg Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -315,6 +333,14 @@ model Food {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // A `pg_trgm`-backed GIN trigram index on `name` (for similarity search,
+  // SPEC.md §4.4) is added via raw-SQL migration
+  // (`20260716120100_add_pg_trgm_food_name_index`) rather than Prisma's
+  // extended-indexes syntax, since GIN + a non-default operator class isn't
+  // representable in this schema file. The `pg_trgm` *extension* itself is
+  // separately declared via `datasource.extensions` above (see the comment
+  // there) so it also exists under `prisma db push` (used by the test
+  // runner), not just `migrate deploy`. See DECISIONS.md.
 
   @@unique([source, externalId])
   @@index([barcode])

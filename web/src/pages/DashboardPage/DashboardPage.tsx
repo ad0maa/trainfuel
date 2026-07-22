@@ -1,6 +1,7 @@
 import { Link, routes } from '@cedarjs/router'
 import { Metadata } from '@cedarjs/web'
 
+import DailyEnergySummaryCell from 'src/components/DailyEnergySummaryCell'
 import TodayScheduledItemsCell from 'src/components/TodayScheduledItemsCell'
 
 const DashboardPage = () => {
@@ -11,11 +12,17 @@ const DashboardPage = () => {
       <main className="tf-page">
         <header className="tf-page-header">
           <h1>Today</h1>
-          <Link to={routes.plan()} className="tf-nav-link">
-            Plan
-          </Link>
+          <nav className="tf-page-nav">
+            <Link to={routes.foodLog()} className="tf-nav-link">
+              Food log
+            </Link>
+            <Link to={routes.plan()} className="tf-nav-link">
+              Plan
+            </Link>
+          </nav>
         </header>
 
+        <DailyEnergySummaryCell />
         <TodayScheduledItemsCell />
       </main>
     </>

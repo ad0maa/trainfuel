@@ -44,15 +44,20 @@ simpler interpretation and note it here" directive. Newest entries at the top of
 
 ## Database
 
-- **Postgres via local Docker Compose**, not Neon/cloud, for dev. `docker-compose.yml`
-  at repo root runs `postgres:16`. Chosen over Neon (which the user's global CLAUDE.md
-  references for other projects) for zero cloud dependency during solo local dev;
-  revisit if/when a shared or hosted environment is needed.
-- **Host port 5544**, not the Postgres default 5432. Another unrelated local project
-  (`sound-round-cedar`) already occupies 5432 (and briefly 5434) on this machine via its
-  own Docker containers — 5544 avoids any collision. (Also hit and resolved a stale
-  OrbStack port-forwarding cache issue on 5433 during setup; moved to 5544 rather than
-  debug OrbStack's proxy state further.)
+- **Postgres via Homebrew**, not Docker/OrbStack, for local dev. Originally ran via
+  `docker-compose.yml` (`postgres:16` on port 5544), but OrbStack's daemon repeatedly
+  became unresponsive during the M0–M2 build, causing recurring interruptions. Switched
+  to the user's existing `brew services` Postgres (17) on the standard port 5432 for
+  reliability — zero container-runtime dependency for local dev. `docker-compose.yml`
+  removed. A `trainfuel` superuser role (dev-only; not how a shared/hosted environment
+  would be configured) owns the `trainfuel_dev`/`trainfuel_test` databases, created via:
+  ```
+  createuser -s trainfuel && psql postgres -c "ALTER ROLE trainfuel WITH PASSWORD 'trainfuel'"
+  createdb -O trainfuel trainfuel_dev && createdb -O trainfuel trainfuel_test
+  ```
+  Neon remains unused here (zero cloud dependency during solo local dev); revisit if/when
+  a shared or hosted environment is needed. CI is unaffected — it uses a GitHub Actions
+  Postgres service container, not local Docker.
 - Cedar's `create-cedar-app` now defaults new projects to **SQLite** (`better-sqlite3` +
   `@prisma/adapter-better-sqlite3`) instead of Postgres. Swapped to
   `@prisma/adapter-pg` (`pg`) and `datasource db { provider = "postgresql" }` per
@@ -308,6 +313,80 @@ simpler interpretation and note it here" directive. Newest entries at the top of
     `isTemplate`/`templateId` columns until the test DB is reset. **This needs the human
     operator to run `yarn cedar test` themselves once** (or grant explicit consent) to
     get a real green/red signal on these service tests.
+
+## M2 — Food core
+
+### AFCD seed (§4.4)
+- **Release used: FSANZ AFCD Release 3, "Nutrient profiles" workbook (1,588 foods).**
+  Default source URL (confirmed reachable at build time):
+  `https://www.foodstandards.gov.au/sites/default/files/2025-12/AFCD%20Release%203%20-%20Nutrient%20profiles.xlsx`
+  (download page: foodstandards.gov.au → science-data → food-nutrient-databases → afcd
+  → data-files). `yarn cedar exec seedAfcd` fetches it live; `--file <path>` parses a
+  manually-downloaded copy for offline/moved-URL cases.
+- **Parsing is a pure function** (`api/src/lib/integrations/foodSources/afcd.ts`) with
+  the seed script as a thin I/O wrapper — same pure-core/thin-shell pattern as M1's
+  recurrence materialization. Columns are addressed **positionally** (AFCD's header
+  names embed newlines/units that vary between releases), with expected-header
+  substring guards at each position so a future release with a reshuffled layout
+  fails loudly instead of silently mis-mapping nutrients.
+- **Energy stored as kcal** (`kJ / 4.184`), since the app's canonical unit is kcal
+  (§6); AFCD publishes kJ.
+- **No `FoodServing` rows seeded** — the AFCD download files carry per-100g/per-100mL
+  profiles only, no household measures, so per §4.4 these foods are gram-only.
+- Idempotent by upsert on `@@unique([source, externalId])` (externalId = AFCD Public
+  Food Key); re-running against a newer release refreshes nutrients in place.
+- New api dependency: `xlsx@^0.18.5` (AFCD ships xlsx only for this workbook).
+- OFF/USDA live lookups are **deferred** (OFF is tied to the M6 barcode flow; USDA is
+  optional-in-v1 per §4.4) — the `foodSources/` interface directory is established so
+  they slot in additively.
+
+### Search: pg_trgm approach (§4.4)
+- Trigram search uses an **explicit `similarity()` expression, not the `%` operator**,
+  so results don't depend on the session-level `pg_trgm.similarity_threshold` GUC;
+  falls back to plain ILIKE for short/low-similarity queries so e.g. "egg" still hits.
+  Recent/frequent foods (90-day frequency-weighted `FoodLogEntry` groupBy) are
+  re-ranked to the top, and a **blank query returns recent/frequent only** — the
+  "top of every search UI" behaviour §4.4 asks for.
+- **The GIN index + `CREATE EXTENSION` live in a raw-SQL migration**
+  (`20260716120100_add_pg_trgm_food_name_index`) because Prisma's schema DSL can't
+  express an expression/operator-class index. Additionally, `extensions = [pg_trgm]`
+  (+ the `postgresqlExtensions` preview feature) is declared in `schema.prisma` —
+  belt-and-braces needed because Cedar's test runner provisions the test DB via
+  `prisma db push`, which does **not** replay raw-SQL migrations: without the schema
+  declaration, `similarity()` would work in dev/prod (`migrate deploy`) but throw in
+  every test run. Tests only need the extension/function; the GIN index is a
+  production performance concern only.
+
+### Schema gap fix: `Profile.currentWeightKg`
+- §6.1 says BMR weight falls back to "profile-entered weight", but the spec's own
+  `Profile` outline never defines that field. Added `currentWeightKg Float?` in M2
+  (additive migration `20260716120000_add_profile_current_weight_kg`). Weight
+  resolution order in `dailySummary`: latest `DailyMetric.weightKg` ≤ the requested
+  date, else `Profile.currentWeightKg`, else the summary reports targets as
+  unavailable rather than inventing a number.
+
+### Nutrient snapshots & rollups (§3.4/§3.5)
+- `computeLoggedNutrients` is generic over every numeric field in `per100` (not just
+  the four macros) so optional AFCD/OFF fields (fibre, sugars, sodium) flow into the
+  `FoodLogEntry.nutrients` snapshot without the module knowing each source's
+  vocabulary. It **throws on invalid quantity/serving input** rather than producing
+  wrong numbers — §3.4's unit-conversion bug class is treated as fail-loud.
+- **Date-only columns** (`FoodLogEntry.loggedFor`, `DailyMetric.date`) are stored as
+  the **UTC midnight of the local date string**, via a new `localDateToUtcMidnight`
+  helper (inverse of `localDateString`) — one canonical representation, unique-
+  constraint-friendly, always constructed through the helper.
+- **`DailyMetric` maintenance is on-write + nightly**, per §3.5: every food-log
+  create/update/delete recomputes that day's rollup immediately (update recomputes
+  *both* days when an entry moves dates), and `yarn cedar exec rollupDailyMetrics
+  [--days N] [--userId id]` is the idempotent nightly/backfill counterpart. Cron
+  wiring deferred to the hosting decision, same as M1's materialization job.
+
+### Dashboard energy summary (§6.2, M2 scope)
+- The Level 1 target on the Dashboard computes with `exerciseKcalRaw: 0` — correct,
+  not a bug: `ExternalActivity` is empty until M3/M4, and §8's M2 bullet is explicit
+  that M2 ships "static targets... Level 1 without live exercise yet". The
+  `flooredAtBmr` flag from the energy module is surfaced as the gentle UI note §6.2
+  requires.
 
 ## Open items carried from SPEC.md §10 (not yet resolved)
 

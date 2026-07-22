@@ -24,6 +24,7 @@ const Routes = () => {
             keep working without touching four generated auth pages */}
         <Route path="/" page={DashboardPage} name="home" />
         <Route path="/plan" page={PlanPage} name="plan" />
+        <Route path="/food-log" page={FoodLogPage} name="foodLog" />
       </PrivateSet>
       <Route notfound page={NotFoundPage} />
     </Router>

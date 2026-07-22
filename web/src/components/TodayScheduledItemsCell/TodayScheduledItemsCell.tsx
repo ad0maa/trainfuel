@@ -132,11 +132,10 @@ export const Success = ({
 
   return (
     <div className="tf-today-list">
-      {/* TODO(M2): calorie/macro ring — a live Level 1 target vs. today's
-          logged intake goes here, above or beside the session list. Leave
-          this container as the mount point so it doesn't need restructuring. */}
-      <div className="tf-macro-ring-slot" />
-
+      {/* The M2 calorie/macro ring is rendered by DashboardPage as a
+          sibling <DailyEnergySummaryCell /> above this cell, rather than
+          nested in here — keeps the two GraphQL queries (and their
+          independent loading/error states) cleanly separate. */}
       <ul className="tf-item-list">
         {todayScheduledItems.map((item) => {
           const isCompleted = item.status === 'COMPLETED'

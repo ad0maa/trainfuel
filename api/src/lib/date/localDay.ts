@@ -124,6 +124,20 @@ export function addLocalDays(dateStr: string, days: number): string {
   )
 }
 
+/**
+ * Converts a `YYYY-MM-DD` local-date string into the stable UTC-midnight
+ * `Date` value used to store "date-only" columns (`FoodLogEntry.loggedFor`,
+ * `DailyMetric.date`) — both represent a local calendar day, not an instant,
+ * so they're stored as the UTC midnight of that date string for a
+ * consistent, directly-comparable/unique-constraint-friendly value. Always
+ * go through this (and `localDateString`, its inverse) rather than
+ * constructing these columns' values ad hoc.
+ */
+export function localDateToUtcMidnight(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
 async function getUserTimezone(userId: string): Promise<string> {
   const profile = await db.profile.findUnique({
     where: { userId },
