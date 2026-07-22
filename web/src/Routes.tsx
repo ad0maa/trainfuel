@@ -25,6 +25,11 @@ const Routes = () => {
         <Route path="/" page={DashboardPage} name="home" />
         <Route path="/plan" page={PlanPage} name="plan" />
         <Route path="/food-log" page={FoodLogPage} name="foodLog" />
+        {/* STRAVA_OAUTH_REDIRECT_URI points straight at this route — Strava's
+            redirect (?code=...) lands here and SettingsPage reads it itself
+            (useLocation), no separate /settings/integrations/... sub-route
+            needed. See DECISIONS.md "M3". */}
+        <Route path="/settings" page={SettingsPage} name="settings" />
       </PrivateSet>
       <Route notfound page={NotFoundPage} />
     </Router>

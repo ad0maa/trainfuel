@@ -474,6 +474,145 @@ stack we didn't end up continuing with.
   existing `TrainingBlocksCell`. Reuses the existing block/week-view rendering — no new
   visualization needed, per CONSOLIDATION_PLAN.md's "no new visualization needed" note.
 
+## M3 — Strava (ported from the donor `health` repo)
+
+Per CONSOLIDATION_PLAN.md Phase 2: the donor Django repo's `sync/` app had a working
+Strava OAuth + webhook + backfill implementation. Ported the *logic* to Cedar
+services/functions; the auto-tick matching engine (SPEC.md §3.3) has no donor
+equivalent and is new.
+
+### Token encryption (`api/src/lib/crypto.ts`)
+- AES-256-GCM, deferred from M0/M2 — this is the first milestone that writes a
+  real token. `TOKEN_ENCRYPTION_KEY` (32-byte base64) was already reserved in
+  `.env`/`.env.example`. Stored format: `base64(iv):base64(authTag):base64(ciphertext)`,
+  fresh random IV every call (never reuse ciphertext for equality checks). GCM's
+  auth tag makes tamper-detection automatic — decrypting a modified value throws
+  rather than silently returning garbage.
+
+### Strava client (`api/src/lib/integrations/strava.ts`)
+- Same shape as the donor's `StravaClient` (getAuthUrl, exchangeCode, listActivities,
+  getActivity), with token refresh handled transparently in the client. Two additions
+  the donor didn't have: **429 backoff** (SPEC.md §4.1 explicitly requires it) via
+  `computeBackoffDelayMs` — prefers the server's `Retry-After` header, falls back to
+  exponential (1s/2s/4s), gives up after 3 attempts and lets the caller surface the
+  429; and **proactive refresh** via `isTokenExpiringSoon` (60s margin).
+- **`exchangeStravaCode` takes no `redirectUri` param** — Strava's token endpoint
+  doesn't require it to be re-sent for the code exchange (confirmed against the
+  donor's own implementation, which also omits it there despite passing it to
+  `getAuthUrl`). Caught by ESLint's unused-var check while porting, not by manual
+  review — worth noting since it means the parameter was carried over on autopilot
+  in the first draft, matching `getAuthUrl`'s signature, before the linter flagged it.
+- **Only the pure decision logic is unit tested** (`getStravaAuthUrl`,
+  `isTokenExpiringSoon`, `computeBackoffDelayMs`) — the actual fetch wrappers
+  (`exchangeStravaCode`, `refreshStravaTokens`, `listStravaActivities`,
+  `getStravaActivity`) do real network I/O and aren't unit tested directly, matching
+  this codebase's existing precedent (`scripts/seedAfcd.ts`'s fetch wrapper is
+  likewise untested; only its pure parser is).
+- **Two named env-var helpers (`requireStravaClientId`/`requireStravaClientSecret`),
+  not one generic `requireEnv(name: string)`.** ESLint's `@cedarjs/process-env-computed`
+  rule flags dynamic `process.env[name]` bracket access as breaking production env-var
+  inlining — directly relevant now that Vercel is the deploy target (`yarn cedar setup
+  deploy vercel` was run this session; see the `vercel.json`/`cedar.toml` commit).
+  Every env-var access in this app should use literal dot notation for the same reason;
+  this was the first place a generic name-parameterized helper had been written.
+
+### Ingest normalizer (`api/src/lib/integrations/stravaIngest.ts`)
+- `STRAVA_TYPE_MAP` and the kJ→kcal fallback (`× 0.239006`) ported verbatim from the
+  donor's `sync/ingest.py`. One small addition: prefers Strava's newer `sport_type`
+  field over the older `type` when both are present (the donor only read `type`) —
+  forward-compatible only, the values that matter for this map are identical between
+  the two fields for existing data.
+- **Not ported: the donor's fuzzy cross-source dedup** (±60s start time / 10% duration
+  tolerance, for reconciling the same run reported by both Strava and HealthKit).
+  SPEC.md defers cross-source reconciliation to v2; v1's dedup is the
+  `@@unique([source, externalId])` constraint `ingestStravaActivity` upserts on.
+
+### Matching engine (`api/src/lib/matching.ts` + `api/src/services/externalActivities/`)
+- SPEC.md §3.3's six rules — no donor equivalent, built directly from the spec.
+  `matching.ts` holds rules 2–4 as a pure `selectMatch` function (candidates in, a
+  confidence-tagged match or `null` out); `externalActivities.ts` enforces rules 1
+  (compatible-type filtering), 5, and 6 (both need DB state) and does the actual
+  Completion write.
+- **Rule 3's FUZZY match completes the item immediately**, same as an EXACT match —
+  it doesn't wait in a pending state. `matchConfidence: FUZZY` is what the (future)
+  UI reads to show "auto-matched — confirm?"; M1's `completeScheduledItem(force:
+  true)` is already the mechanism to overwrite a wrong fuzzy match with a fresh
+  manual one (built in M1 in anticipation of exactly this M3 rule).
+- **Rule 5 (never overwrite manual/prior completions) is enforced by excluding any
+  ScheduledItem that already has a `Completion` from the candidate query**
+  (`completion: null` filter), not by a post-hoc check — a completed item is
+  never a candidate in the first place.
+- **Rule 6 (idempotent re-processing) has two layers:** `ingestStravaActivity` upserts
+  the `ExternalActivity` row itself (safe to call twice), and `matchAndComplete`
+  separately checks for an existing `Completion.externalActivityId` before doing any
+  matching — so a webhook retry or overlapping backfill window can't produce a second
+  Completion for the same activity.
+- **`compatibleScheduledItemType`** maps `run → RUN` and `strength → LIFT` — the LIFT
+  mapping exists even though M4 (Hevy) isn't built yet, because SPEC §3.3 rule 1's
+  wording is general ("Run→RUN, WeightTraining→LIFT") and Strava itself can report
+  WeightTraining activities. `ride`/`swim`/`walk`/`hike`/`other` have no
+  ScheduledItemType and always land in the unmatched tray.
+- **`ExternalActivity`'s GraphQL type is deliberately lean** — no `exercises` or
+  `completions` relation fields exposed yet. `exercises` would always resolve empty
+  until M4 populates it from Hevy; adding the field (and its resolver) now would be
+  dead code. Re-add both when M4 needs them.
+
+### OAuth connect + status (`api/src/services/integrationAccounts/`)
+- **Web-owned OAuth redirect, not a REST callback route** — `STRAVA_OAUTH_REDIRECT_URI`
+  points straight at `/settings` (SettingsPage reads `?code=` itself via `useLocation`
+  and calls the `connectStrava` mutation), mirroring the pattern already reserved for
+  `GOOGLE_OAUTH_REDIRECT_URI` in `.env.example`, rather than the donor's Django
+  `StravaCallbackView` REST endpoint. No extra route needed.
+- **`getFreshStravaTokens` lives in its own file** (`stravaTokens.ts`), split out from
+  `integrationAccounts.ts`, specifically to avoid a circular import:
+  `integrationAccounts.ts`'s `connectStrava` needs to call into `stravaBackfill.ts`
+  (to kick off the post-connect backfill), and `stravaBackfill.ts` needs the token
+  helper too — if the helper lived in `integrationAccounts.ts`, the two files would
+  import each other. (An earlier draft used a dynamic `import()` inside `connectStrava`
+  to sidestep this; replaced with the file split before committing — dynamic imports
+  aren't a pattern used anywhere else in this codebase and existed only to route
+  around the cycle, not for any real code-splitting reason.)
+- **`IntegrationStatus` (GraphQL type) always returns a real object, never null** —
+  even when nothing is connected (`connected: false`, other fields `null`) — so the
+  Settings UI never has to null-check the whole query result, only individual fields.
+  Never exposes `accessToken`/`refreshToken`/`apiKey` (SPEC.md §3.6's "never return raw
+  tokens through GraphQL").
+- **Backfill is fire-and-forget from `connectStrava`, not a durable job** — there's no
+  job runner set up yet (same gap M1 flagged for recurrence materialization; M3
+  doesn't resolve it either). A failure is caught and written to
+  `IntegrationAccount.status`/`statusDetail` (visible in Settings, per SPEC §9's
+  error-surfacing rule) rather than silently lost, and the whole backfill is always
+  safely re-runnable via `yarn cedar exec backfillStravaActivities --userId <id>`
+  (idempotent — same upsert-based ingest). Revisit alongside M1's cron gap once
+  hosting (and therefore a real job mechanism) is decided.
+- **Backfill window: last 30 days**, per SPEC.md §4.1 — diverging deliberately from
+  the donor's Celery task, which pulled full history.
+
+### Webhook (`api/src/functions/stravaWebhook.ts`)
+- Single Cedar function handling both the GET hub-challenge validation and POST
+  activity events, served at `/api/stravaWebhook` (per `cedar.toml`'s `web.apiUrl`,
+  itself just changed to `/api` by `yarn cedar setup deploy vercel` this session —
+  was `/.api/functions` before). No CSRF exemption needed the way the donor's Django
+  view required `@method_decorator(csrf_exempt, ...)` — Cedar's CSRF middleware only
+  wraps the dbAuth `auth` function, not arbitrary custom functions.
+- **Processes the activity inline, synchronously** — no queue, same "no job runner
+  yet" gap as the backfill. A single activity fetch + ingest is cheap enough at
+  single-user scale. Errors are logged, not surfaced to Strava (still returns 200) —
+  Strava retries on non-2xx, and retrying an already-failed fetch (e.g. a
+  since-deleted activity) would just repeat the failure for no benefit.
+
+### Deploy target (unrelated to Strava, done the same session)
+- **`yarn cedar setup deploy vercel`** was run, adding `vercel.json` and changing
+  `cedar.toml`'s `web.apiUrl` from `/.api/functions` to `/api`. Pushed as its own
+  commit ahead of the Strava work, per explicit instruction, since it's an
+  infrastructure change independent of M3. Actual Vercel project linking/env var
+  configuration is a follow-up (owner checklist item #3 — hosting — is still open;
+  Vercel covers the web+api split but the Postgres database and any future
+  job-runner still need a decision).
+- Repo is now public at `github.com/ad0maa/trainfuel` (created and pushed this
+  session) — `.env` (real secrets) confirmed never tracked; only `.env.example`/
+  `.env.defaults` are in the repo.
+
 ## Open items carried from SPEC.md §10 (not yet resolved)
 
 1. Real product name — still "TrainFuel" placeholder.

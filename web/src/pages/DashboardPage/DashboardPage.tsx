@@ -3,6 +3,7 @@ import { Metadata } from '@cedarjs/web'
 
 import DailyEnergySummaryCell from 'src/components/DailyEnergySummaryCell'
 import TodayScheduledItemsCell from 'src/components/TodayScheduledItemsCell'
+import UnmatchedActivitiesCell from 'src/components/UnmatchedActivitiesCell'
 
 const DashboardPage = () => {
   return (
@@ -19,11 +20,15 @@ const DashboardPage = () => {
             <Link to={routes.plan()} className="tf-nav-link">
               Plan
             </Link>
+            <Link to={routes.settings()} className="tf-nav-link">
+              Settings
+            </Link>
           </nav>
         </header>
 
         <DailyEnergySummaryCell />
         <TodayScheduledItemsCell />
+        <UnmatchedActivitiesCell />
       </main>
     </>
   )

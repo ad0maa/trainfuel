@@ -110,7 +110,38 @@ kg/week, mirroring the donor's MAX_DEFICIT/MAX_SURPLUS caps) — currently unval
 
 ---
 
-## Phase 2 (M3) — Strava, ported not greenfield
+## Phase 2 (M3) — Strava, ported not greenfield ✅ done (2026-07-23)
+
+**Shipped:** `api/src/lib/crypto.ts` (AES-256-GCM token encryption, +7 tests),
+`api/src/lib/integrations/{strava,stravaIngest}.ts` (client with 429 backoff +
+proactive refresh, ingest normalizer, +19 tests), `api/src/lib/matching.ts` (SPEC
+§3.3's six-rule auto-tick engine, +9 tests), `api/src/services/externalActivities/`
+(ingest/match/unmatched-tray/manual-link, +10 tests) and
+`api/src/services/integrationAccounts/` (OAuth connect + status, +5 tests),
+`api/src/functions/stravaWebhook.ts`, `scripts/backfillStravaActivities.ts`, plus web:
+`SettingsPage`/`StravaIntegrationCell` (connect flow) and `UnmatchedActivitiesCell` on
+the Dashboard (manual link picker). Full project suite: 27/27 test suites, 194/194
+tests; lint and type-check clean. One real bug caught by the linter, not review: an
+unused `redirectUri` param on `exchangeStravaCode` (Strava's token endpoint doesn't
+need it) — see DECISIONS.md "M3" for that and every other design decision (matching
+rules 5/6 enforcement, the circular-import fix behind `stravaTokens.ts`, the
+fire-and-forget backfill tradeoff, the lean `ExternalActivity` GraphQL type).
+
+**Also done this session, unrelated to Strava but worth noting:** `yarn cedar setup
+deploy vercel` (adds `vercel.json`, changes `cedar.toml`'s `apiUrl` to `/api`,
+pushed as its own commit), and the repo went public at
+[github.com/ad0maa/trainfuel](https://github.com/ad0maa/trainfuel).
+
+**Still open from this phase:** a real job runner (backfill and the webhook both
+process inline/fire-and-forget — same gap M1 left for recurrence materialization);
+Google Calendar-style REST callback vs. the web-owned-redirect pattern used here
+(now the established convention — Google Calendar in M5 should follow it too, not
+the SPEC's original "web connect screen" REST assumption). Owner checklist items #2
+(register a real Strava app) and #3 (pick hosting) are unblocked by this phase's
+code but not yet done — the webhook and full end-to-end demo need them.
+
+<details>
+<summary>Original phase brief (kept for context — see DECISIONS.md "M3" for what actually shipped)</summary>
 
 SPEC §4.1 scope, using the donor's working implementation as the reference. The donor
 solved: OAuth code exchange, transparent pre-call token refresh, webhook GET
@@ -137,6 +168,8 @@ Dev webhook URL: tunnel (`cloudflared`/`ngrok`) until hosting is chosen.
 ### After M3, the app is demoable end-to-end
 Plan generated → sessions on the calendar view → run recorded on watch → Strava →
 auto-ticked with source badge → daily calorie target moves. That's the folio demo.
+
+</details>
 
 ---
 
