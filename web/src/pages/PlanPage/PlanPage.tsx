@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, routes } from '@cedarjs/router'
 import { Metadata } from '@cedarjs/web'
 
+import GenerateTrainingPlanForm from 'src/components/GenerateTrainingPlanForm'
 import TrainingBlocksCell from 'src/components/TrainingBlocksCell'
 import WeekScheduledItemsCell from 'src/components/WeekScheduledItemsCell'
 
@@ -44,6 +45,7 @@ const PlanPage = () => {
         <section className="tf-plan-section">
           <h2>Blocks</h2>
           <TrainingBlocksCell />
+          <GenerateTrainingPlanForm />
         </section>
 
         <section className="tf-plan-section">

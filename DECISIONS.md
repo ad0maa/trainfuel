@@ -313,6 +313,11 @@ simpler interpretation and note it here" directive. Newest entries at the top of
     `isTemplate`/`templateId` columns until the test DB is reset. **This needs the human
     operator to run `yarn cedar test` themselves once** (or grant explicit consent) to
     get a real green/red signal on these service tests.
+    - **Resolved 2026-07-23:** the operator ran `yarn cedar test` (test DB reset +
+      `db push`), and all 9 suites / 73 tests passed, including these previously-unrun
+      service tests. `SKIP_DB_PUSH=1 yarn cedar test` (no schema change since) now
+      confirms the full suite (18 suites / 103 tests at that point) without needing a
+      further reset. See CONSOLIDATION_PLAN.md Phase 0.
 
 ## M2 — Food core
 
@@ -387,6 +392,87 @@ simpler interpretation and note it here" directive. Newest entries at the top of
   that M2 ships "static targets... Level 1 without live exercise yet". The
   `flooredAtBmr` flag from the energy module is surfaced as the gentle UI note §6.2
   requires.
+
+## M2.5 — Plan generator (ported from the donor `health` repo)
+
+Per CONSOLIDATION_PLAN.md Phase 1: SPEC.md §7.1 calls week-by-week template
+auto-generation a stretch goal. Rather than building it fresh, it's ported from
+the abandoned Django sibling repo (`health/backend/apps/plans/{templates,engine}.py`),
+which had this exact logic written, tested, and working — just on the framework/
+stack we didn't end up continuing with.
+
+- **`api/src/lib/planTemplates/templates.ts`**: the four static templates (C25K 9wk,
+  5K 12wk, 10K 16wk, 21.1K 20wk) translated mechanically from the donor's frozen
+  dataclasses to `readonly` TS interfaces + `as const` data — no numbers or session
+  text changed.
+- **`api/src/lib/planTemplates/generatePlan.ts`**: `findEntryWeek`/`checkFeasibility`
+  ported 1:1 (same algorithm, semantics, and edge cases as `engine.py`); `generatePlan`
+  itself is new — the donor persisted its own `Plan`/`PlanWeek`/`PlanSession` models,
+  which this schema doesn't have, so it maps templates onto the existing
+  `TrainingBlock`/`ScheduledItem` models instead. Kept as a **pure function** (no DB
+  access), matching M1's `materializeRecurringItems.ts` pure-core/thin-shell pattern —
+  `api/src/services/trainingPlans/trainingPlans.ts` is the thin shell that persists it.
+- **`findEntryWeek`'s real behaviour, confirmed while porting the tests:** it is
+  "last positional match wins," not "nearest volume wins." Because recovery weeks
+  (lower volume) always sit later in a phase's week sequence and still satisfy
+  `≤ currentWeeklyKm` for a wide range of inputs, a mid-range current volume can land
+  on a *later, lower-volume* recovery week rather than the week whose volume it most
+  closely matches (e.g. in `PLAN_5K`, any `currentWeeklyKm` in `[16, 21]` enters at
+  week 8, a 16 km/wk recovery week, not week 5/6/7's higher volumes). This is the
+  donor's real, working algorithm, not a porting bug — see the "ported find_entry_week
+  semantics" test in `generatePlan.test.ts`, which documents it explicitly. Note the
+  donor's own `test_exact_match_on_volume` test (`current_weekly_km=14.0` expecting an
+  exact match) is actually **wrong given the donor's own template data** — tracing the
+  algorithm by hand shows it would return week 4 (a 12 km/wk recovery week), not
+  week 2 (14 km/wk) — so it wasn't ported; the ported suite instead tests exact-match
+  at `currentWeeklyKm=24.0` (the last non-taper week's volume), which is unambiguous.
+- **Phase mapping — no `BlockPhase` enum extension.** Template phases `base`/`build`/
+  `peak`/`taper` collapse onto the three existing values: `base → REBUILD`,
+  `build → BUILD`, `peak → BUILD`, `taper → TAPER`. The human-readable distinction
+  between `build` and `peak` survives in the block's `name` (e.g. "5K — Build" vs
+  "5K — Peak"), since blocks are segmented by contiguous runs of the *template's*
+  4-way phase, then each segment's `BlockPhase` is derived from the mapping.
+- **Monday-anchoring + default session time.** Generated sessions anchor to the first
+  Monday on/after the requested `startDate` (pure calendar-string math, mirroring
+  `addLocalDays`) and default to **07:00 local time** — computed as `Profile.timezone`'s
+  local midnight (via `localDayBoundsUtc`, already DST-safe) **plus a fixed 7-hour UTC
+  offset**, not a true "always 07:00 local" conversion. This is the same class of
+  simplification M1's DECISIONS.md already flagged for RRULE expansion: a plan whose
+  Monday lands right on an AEST↔AEDT transition could get a session at 06:00 or 08:00
+  local instead of 07:00, twice a year. Accepted for the same reason (real complexity
+  for a twice-yearly, one-hour cosmetic edge case) — flag for a real fix if it becomes
+  a live pain point.
+- **`prescription` JSON carries `isLongRun`/`isQualityRun` flags** (`long` → long run;
+  `tempo`/`interval` → quality run) specifically so SPEC.md §6.3's M7 carb
+  periodization (LONG_RUN 5 g/kg, QUALITY_RUN 4 g/kg) can read plan-generated sessions
+  directly with zero extra work at M7.
+- **`generateTrainingPlan` mutation** (`api/src/services/trainingPlans/`): resolves
+  the user's `Profile.timezone` (falling back to `DEFAULT_TIMEZONE` for a user with no
+  profile yet — same fallback pattern as the energy module), calls the pure generator,
+  and persists all blocks + sessions in a single `db.$transaction`.
+  - **Overlap guard:** before persisting, counts existing non-template `RUN` items in
+    `[planStart, planEnd]` for the user; rejects with `UserInputError` unless
+    `confirmOverlap: true` is passed — same "reject, offer an explicit re-confirm"
+    shape as M1's `completeScheduledItem` `force` flag, rather than silently
+    double-booking. The web form catches this specific error and re-submits with
+    `confirmOverlap: true` after a `confirm()`, so the user doesn't have to re-fill
+    the form.
+  - **`PlanGoalType` GraphQL enum uses descriptive names** (`COUCH_TO_5K`, `FIVE_K`,
+    `TEN_K`, `HALF_MARATHON`), not `5K`/`10K` — GraphQL enum values can't start with a
+    digit. Mapped to the internal `GoalType` string literals (`'c25k' | '5k' | '10k' |
+    '21k'`) at the service boundary.
+- **Not ported:** the donor's TDEE module (`users/tdee.py`) and its flat 1200 kcal
+  floor — this repo's `api/src/lib/energy/` (BMR floor, SPEC §6.2) already covers that
+  ground and is what M2 already shipped against. The donor's fuzzy Strava/HealthKit
+  activity dedup (`sync/ingest.py`) is likewise not part of this port — that's an M3
+  concern, addressed separately when Strava lands (see CONSOLIDATION_PLAN.md Phase 2).
+- **Deferred, not forgotten:** clamping `Profile.weeklyWeightDeltaKg` (the donor
+  enforces `MAX_DEFICIT_PER_DAY`/`MAX_SURPLUS_PER_DAY` caps; this repo's field is
+  currently unvalidated at write time) — flagged in CONSOLIDATION_PLAN.md, not blocking
+  M2.5.
+- **Web:** `GenerateTrainingPlanForm` (new component) added to `PlanPage`, next to the
+  existing `TrainingBlocksCell`. Reuses the existing block/week-view rendering — no new
+  visualization needed, per CONSOLIDATION_PLAN.md's "no new visualization needed" note.
 
 ## Open items carried from SPEC.md §10 (not yet resolved)
 

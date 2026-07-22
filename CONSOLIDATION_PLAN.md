@@ -15,29 +15,37 @@ generator port) and modifies **M3** (Strava, now a port rather than greenfield).
 
 ---
 
-## Phase 0 — Stabilize what exists (do first, ~1 session)
+## Phase 0 — Stabilize what exists ✅ done (2026-07-23)
 
-1. **[HUMAN] Run `yarn cedar test` once** from a terminal. Prisma's AI-agent guardrail
-   blocks the test-DB reset (`db push --force-reset` on `trainfuel_test`) from agents;
-   the M1 service scenario tests (`trainingBlocks.test.ts`, `scheduledItems.test.ts`)
-   and the M2 service tests have **never executed**. This is the single biggest unknown
-   in the codebase. Fix anything red.
-2. **Commit M2** (food core): energy module, nutrition libs, foods/foodLogEntries/
-   dailySummary services + SDL, FoodSearchLogger/FoodLogPage, seedAfcd +
-   rollupDailyMetrics scripts, the two new migrations, and the DECISIONS.md /
-   docker-compose removal changes. Suggested: `✨ M2: food core — AFCD seed, food log,
-   energy targets, daily rollups`.
-3. **Add the missing M2 section to DECISIONS.md** (the log currently ends at M1 —
-   document the pg_trgm search, snapshot-nutrients approach, seed decisions).
-4. Housekeeping in `~/projects/temp-health/`: delete `health-life/` (empty), stop
-   touching `python-backend/` (commit or discard its 571-line uncommitted nutrition WIP
-   — recommend discard, kitkaboodle's M2 supersedes it), keep `health/` read-only as
-   the donor. Also note: `health` has 5 stale agent worktrees pointed at its initial
-   commit — nothing of value, prune when archiving.
+1. ✅ **[HUMAN] ran `yarn cedar test` once** — test DB reset, 9 suites / 73 tests
+   green, including the previously-never-executed M1/M2 service tests. Full suite
+   (`SKIP_DB_PUSH=1 yarn cedar test`) later confirmed at 18/18 suites, 103/103 tests.
+2. ✅ **Committed M2** (food core) — `✨ M2: food core — AFCD seed, food search & log,
+   energy targets, daily rollups` (39 files, 2607 insertions).
+3. ✅ **Added the M2 section to DECISIONS.md** (AFCD seed, pg_trgm search, schema gap
+   fix, nutrient snapshots/rollups).
+4. ⬜ Still open: delete `health-life/` (empty), discard `python-backend`'s
+   uncommitted nutrition WIP, prune `health`'s 5 stale agent worktrees when archiving.
+   None of these block further kitkaboodle work — housekeeping only, do whenever.
 
 ---
 
-## Phase 1 (M2.5) — Port the running-plan generator from `health`
+## Phase 1 (M2.5) — Port the running-plan generator from `health` ✅ done (2026-07-23)
+
+**Shipped:** `api/src/lib/planTemplates/{templates,generatePlan}.ts` (+36 tests, all
+green), `api/src/services/trainingPlans/trainingPlans.ts` (`generateTrainingPlan`
+mutation, +5 scenario tests), `api/src/graphql/trainingPlans.sdl.ts`, and a
+`GenerateTrainingPlanForm` component wired into `PlanPage`. Full project suite:
+21/21 test suites, 144/144 tests; lint and type-check clean. Full rationale — including
+the corrected `findEntryWeek` test cases (the donor's own `test_exact_match_on_volume`
+was wrong against its own template data) and the DST/session-time caveat — is in
+DECISIONS.md's "M2.5 — Plan generator" section, not duplicated here.
+
+**Still open from this phase:** the `weeklyWeightDeltaKg` clamp (deferred, noted
+below — this phase's work needed no schema change at all, so it's untouched).
+
+<details>
+<summary>Original phase brief (kept for context — see DECISIONS.md for what actually shipped)</summary>
 
 The one substantial piece of finished logic the Django repo has that this repo lacks.
 SPEC.md §7.1 called template auto-generation a "stretch goal"; the stretch is already
@@ -97,6 +105,8 @@ Donor `Plan/PlanWeek/PlanSession` map onto the existing `TrainingBlock` +
 (BMR floor beats the donor's flat 1200 kcal floor). **One guardrail to adopt from the
 donor:** clamp `Profile.weeklyWeightDeltaKg` at write time (suggest `[-1.0, +0.5]`
 kg/week, mirroring the donor's MAX_DEFICIT/MAX_SURPLUS caps) — currently unvalidated.
+
+</details>
 
 ---
 
