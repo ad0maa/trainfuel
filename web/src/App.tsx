@@ -7,8 +7,12 @@ import FatalErrorPage from 'src/pages/FatalErrorPage'
 
 import { AuthProvider, useAuth } from './auth.js'
 
-import './index.css'
+import '@fontsource/ibm-plex-sans/400.css'
+import '@fontsource/ibm-plex-sans/600.css'
+import '@fontsource/ibm-plex-mono/400.css'
+import '@fontsource/ibm-plex-mono/700.css'
 import './scaffold.css'
+import './index.css'
 
 interface AppProps {
   children?: ReactNode

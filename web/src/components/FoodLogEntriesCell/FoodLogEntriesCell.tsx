@@ -57,7 +57,7 @@ export const Empty = () => (
 export const Failure = ({
   error,
 }: CellFailureProps<FoodLogEntriesForDayQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 const MEAL_ORDER = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'] as const

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=Archivo:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #101314; }
+  a { color: inherit; }
+</style>
+</helmet>
+
+<div style="font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; background: #101314; color: #e8ebe9; padding: 40px clamp(20px, 4vw, 64px) 96px; min-height: 100vh;">
+
+  <!-- intro -->
+  <div style="max-width: 760px; margin-bottom: 40px;">
+    <div style="font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #7b8582; font-weight: 600; margin-bottom: 14px;">TrainFuel · Design System · Turn 1</div>
+    <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(30px, 4vw, 46px); line-height: 1.05; margin: 0 0 16px; letter-spacing: -0.02em;">Three directions for the theme</h1>
+    <p style="font-size: 16px; line-height: 1.6; color: #a7afac; margin: 0; text-wrap: pretty;">All three are premium, athletic, and data-first — built to reuse across web and mobile. Each shows its palette, type scale, core components, and a themed Today dashboard in light + dark. Reference an option by its id (<strong style="color:#e8ebe9;">1a</strong>, <strong style="color:#e8ebe9;">1b</strong>, <strong style="color:#e8ebe9;">1c</strong>) and tell me which to build out.</p>
+  </div>
+
+  <!-- ============ TURN 2 — COBALT VARIATIONS ============ -->
+  <div style="margin-bottom:40px;">
+    <div style="font-size:12px; letter-spacing:0.18em; text-transform:uppercase; color:#7b8582; font-weight:600; margin-bottom:12px;">Turn 2 · Cobalt direction — palette & font variations</div>
+    <p style="font-size:15px; line-height:1.6; color:#a7afac; margin:0 0 24px; max-width:720px;">Same cool, clinical, gradient-ring direction as <a href="#1c" style="color:#4d84ff;">1c</a> — three alternative palette + typeface pairings. Pick one (or mix a palette from one with a font from another).</p>
+    <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start;">
+
+      <!-- ===== 2a — INDIGO / SORA ===== -->
+      <section id="2a" style="--bg:#f5f6fb; --surf:#ffffff; --bd:#e5e7f0; --tx:#14152a; --mut:#64678a; --acc:#4f46e5; --acc2:#a855f7; --track:#e5e7f0; --onacc:#ffffff; --soft:rgba(79,70,229,0.10); width:640px; max-width:100%; background:#181b1c; border:1px solid #262a2b; border-radius:26px; padding:26px; box-sizing:border-box;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-family:'Sora',sans-serif; font-weight:700; font-size:13px; background:#7c6cff; color:#fff; border-radius:8px; padding:3px 9px;">2a</span>
+            <h2 style="font-family:'Sora',sans-serif; font-size:23px; font-weight:700; margin:0; letter-spacing:-0.02em; color:#f4f6f5;">Indigo</h2>
+          </div>
+          <span style="font-size:11px; color:#7b8582; text-transform:uppercase; letter-spacing:0.1em;">Sora</span>
+        </div>
+        <p style="font-size:13.5px; line-height:1.55; color:#9aa2a0; margin:0 0 20px;">Indigo-to-violet gradient, geometric grotesk. Modern and confident.</p>
+        <div style="display:flex; gap:14px; margin-bottom:22px;">
+          <div style="flex:1;">
+            <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Light</div>
+            <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Sora',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+              <div style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0);">
+                  <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:28px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">120g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">210g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">58g</div></div>
+              </div>
+              <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+                <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+              </div>
+              <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+            </div>
+          </div>
+          <div style="flex:1; --bg:#0b0b16; --surf:#16172a; --bd:#262844; --tx:#eeeefb; --mut:#8b8db5; --acc:#7c6cff; --acc2:#c084fc; --track:#262844; --onacc:#0b0b16; --soft:rgba(124,108,255,0.18);">
+            <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Dark</div>
+            <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Sora',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+              <div style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0); box-shadow:0 0 24px rgba(124,108,255,0.22);">
+                  <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:28px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">120g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">210g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">58g</div></div>
+              </div>
+              <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+                <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+              </div>
+              <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #262a2b; padding-top:18px;">
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+            <div><div style="display:flex; gap:6px;"><div style="width:32px; height:32px; border-radius:8px; background:#f5f6fb; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#fff; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#14152a;"></div><div style="width:32px; height:32px; border-radius:8px; background:#4f46e5;"></div><div style="width:32px; height:32px; border-radius:8px; background:#a855f7;"></div></div><div style="font-family:'Sora',monospace; font-size:9px; color:#7b8582; margin-top:5px;">LIGHT · #4F46E5 → #A855F7</div></div>
+            <div><div style="display:flex; gap:6px;"><div style="width:32px; height:32px; border-radius:8px; background:#0b0b16; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#16172a; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#eeeefb;"></div><div style="width:32px; height:32px; border-radius:8px; background:#7c6cff;"></div><div style="width:32px; height:32px; border-radius:8px; background:#c084fc;"></div></div><div style="font-family:'Sora',monospace; font-size:9px; color:#7b8582; margin-top:5px;">DARK · #7C6CFF → #C084FC</div></div>
+          </div>
+          <div style="background:#0b0b16; border:1px solid #262844; border-radius:14px; padding:14px; color:#eeeefb; font-family:'Sora',sans-serif;">
+            <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span style="font-size:30px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:15px; font-weight:600;">Heading</span><span style="font-size:12px; color:#8b8db5;">Body text</span></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <button style="background:linear-gradient(120deg,#7c6cff,#c084fc); color:#fff; border:none; border-radius:10px; padding:7px 15px; font-family:inherit; font-weight:700; font-size:12px; cursor:pointer;">Primary</button>
+              <button style="background:#16172a; color:#eeeefb; border:1px solid #262844; border-radius:10px; padding:7px 15px; font-family:inherit; font-weight:600; font-size:12px; cursor:pointer;">Secondary</button>
+              <span style="font-size:10px; font-weight:700; background:rgba(124,108,255,0.18); color:#7c6cff; border-radius:999px; padding:3px 10px;">RUN</span>
+              <span style="font-size:10px; font-weight:700; background:rgba(192,132,252,0.18); color:#c084fc; border-radius:999px; padding:3px 10px;">PB</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 2b — EMERALD / PLUS JAKARTA ===== -->
+      <section id="2b" style="--bg:#f2f8f6; --surf:#ffffff; --bd:#dbe8e3; --tx:#0d1f1a; --mut:#5a7168; --acc:#0f9d76; --acc2:#34d399; --track:#dbe8e3; --onacc:#ffffff; --soft:rgba(15,157,118,0.10); width:640px; max-width:100%; background:#181b1c; border:1px solid #262a2b; border-radius:26px; padding:26px; box-sizing:border-box;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:13px; background:#14c99a; color:#04140f; border-radius:8px; padding:3px 9px;">2b</span>
+            <h2 style="font-family:'Plus Jakarta Sans',sans-serif; font-size:23px; font-weight:800; margin:0; letter-spacing:-0.02em; color:#f4f6f5;">Emerald</h2>
+          </div>
+          <span style="font-size:11px; color:#7b8582; text-transform:uppercase; letter-spacing:0.1em;">Plus Jakarta Sans</span>
+        </div>
+        <p style="font-size:13.5px; line-height:1.55; color:#9aa2a0; margin:0 0 20px;">Fresh emerald-to-mint, rounded humanist sans. Vital and health-forward.</p>
+        <div style="display:flex; gap:14px; margin-bottom:22px;">
+          <div style="flex:1;">
+            <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Light</div>
+            <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+              <div style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0);">
+                  <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:28px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">120g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">210g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">58g</div></div>
+              </div>
+              <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:700; font-size:13px;">Easy 8 km</span></div>
+                <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+              </div>
+              <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+            </div>
+          </div>
+          <div style="flex:1; --bg:#071310; --surf:#0f2019; --bd:#1d3329; --tx:#e8f5f0; --mut:#7fa093; --acc:#14c99a; --acc2:#4ade80; --track:#1d3329; --onacc:#04140f; --soft:rgba(20,201,154,0.18);">
+            <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Dark</div>
+            <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+              <div style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0); box-shadow:0 0 24px rgba(20,201,154,0.22);">
+                  <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:28px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">120g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">210g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">58g</div></div>
+              </div>
+              <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:700; font-size:13px;">Easy 8 km</span></div>
+                <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+              </div>
+              <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #262a2b; padding-top:18px;">
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+            <div><div style="display:flex; gap:6px;"><div style="width:32px; height:32px; border-radius:8px; background:#f2f8f6; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#fff; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#0d1f1a;"></div><div style="width:32px; height:32px; border-radius:8px; background:#0f9d76;"></div><div style="width:32px; height:32px; border-radius:8px; background:#34d399;"></div></div><div style="font-family:'Plus Jakarta Sans',monospace; font-size:9px; color:#7b8582; margin-top:5px;">LIGHT · #0F9D76 → #34D399</div></div>
+            <div><div style="display:flex; gap:6px;"><div style="width:32px; height:32px; border-radius:8px; background:#071310; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#0f2019; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#e8f5f0;"></div><div style="width:32px; height:32px; border-radius:8px; background:#14c99a;"></div><div style="width:32px; height:32px; border-radius:8px; background:#4ade80;"></div></div><div style="font-family:'Plus Jakarta Sans',monospace; font-size:9px; color:#7b8582; margin-top:5px;">DARK · #14C99A → #4ADE80</div></div>
+          </div>
+          <div style="background:#071310; border:1px solid #1d3329; border-radius:14px; padding:14px; color:#e8f5f0; font-family:'Plus Jakarta Sans',sans-serif;">
+            <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span style="font-size:30px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:15px; font-weight:700;">Heading</span><span style="font-size:12px; color:#7fa093;">Body text</span></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <button style="background:linear-gradient(120deg,#14c99a,#4ade80); color:#04140f; border:none; border-radius:10px; padding:7px 15px; font-family:inherit; font-weight:700; font-size:12px; cursor:pointer;">Primary</button>
+              <button style="background:#0f2019; color:#e8f5f0; border:1px solid #1d3329; border-radius:10px; padding:7px 15px; font-family:inherit; font-weight:600; font-size:12px; cursor:pointer;">Secondary</button>
+              <span style="font-size:10px; font-weight:700; background:rgba(20,201,154,0.18); color:#14c99a; border-radius:999px; padding:3px 10px;">RUN</span>
+              <span style="font-size:10px; font-weight:700; background:rgba(74,222,128,0.18); color:#4ade80; border-radius:999px; padding:3px 10px;">PB</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 2c — CYAN / IBM PLEX ===== -->
+      <section id="2c" style="--bg:#f4f6f8; --surf:#ffffff; --bd:#e0e6ec; --tx:#0c1826; --mut:#5b6b7b; --acc:#0891b2; --acc2:#06b6d4; --track:#e0e6ec; --onacc:#ffffff; --soft:rgba(8,145,178,0.10); width:640px; max-width:100%; background:#181b1c; border:1px solid #262a2b; border-radius:26px; padding:26px; box-sizing:border-box;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-family:'IBM Plex Sans',sans-serif; font-weight:700; font-size:13px; background:#22b8d9; color:#04141a; border-radius:8px; padding:3px 9px;">2c</span>
+            <h2 style="font-family:'IBM Plex Sans',sans-serif; font-size:23px; font-weight:600; margin:0; letter-spacing:-0.01em; color:#f4f6f5;">Cyan Steel</h2>
+          </div>
+          <span style="font-size:11px; color:#7b8582; text-transform:uppercase; letter-spacing:0.1em;">IBM Plex Sans</span>
+        </div>
+        <p style="font-size:13.5px; line-height:1.55; color:#9aa2a0; margin:0 0 20px;">Cyan on cool steel, technical grotesque. The most instrument-panel, data-lab feel.</p>
+        <div style="display:flex; gap:14px; margin-bottom:22px;">
+          <div style="flex:1;">
+            <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Light</div>
+            <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'IBM Plex Sans',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+              <div style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0);">
+                  <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:28px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:600; font-variant-numeric:tabular-nums;">120g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:600; font-variant-numeric:tabular-nums;">210g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:600; font-variant-numeric:tabular-nums;">58g</div></div>
+              </div>
+              <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+                <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+              </div>
+              <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:600; font-size:13px; cursor:pointer;">Log food</button>
+            </div>
+          </div>
+          <div style="flex:1; --bg:#08111a; --surf:#101d29; --bd:#1c2f3d; --tx:#eaf2f8; --mut:#7d94a6; --acc:#22b8d9; --acc2:#38e0e0; --track:#1c2f3d; --onacc:#04141a; --soft:rgba(34,184,217,0.18);">
+            <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Dark</div>
+            <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'IBM Plex Sans',sans-serif;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+              <div style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0); box-shadow:0 0 24px rgba(34,184,217,0.22);">
+                  <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:28px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; margin-bottom:12px;">
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:600; font-variant-numeric:tabular-nums;">120g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:600; font-variant-numeric:tabular-nums;">210g</div></div>
+                <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:600; font-variant-numeric:tabular-nums;">58g</div></div>
+              </div>
+              <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+                <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+              </div>
+              <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:600; font-size:13px; cursor:pointer;">Log food</button>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #262a2b; padding-top:18px;">
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+            <div><div style="display:flex; gap:6px;"><div style="width:32px; height:32px; border-radius:8px; background:#f4f6f8; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#fff; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#0c1826;"></div><div style="width:32px; height:32px; border-radius:8px; background:#0891b2;"></div><div style="width:32px; height:32px; border-radius:8px; background:#06b6d4;"></div></div><div style="font-family:'IBM Plex Sans',monospace; font-size:9px; color:#7b8582; margin-top:5px;">LIGHT · #0891B2 → #06B6D4</div></div>
+            <div><div style="display:flex; gap:6px;"><div style="width:32px; height:32px; border-radius:8px; background:#08111a; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#101d29; border:1px solid #333;"></div><div style="width:32px; height:32px; border-radius:8px; background:#eaf2f8;"></div><div style="width:32px; height:32px; border-radius:8px; background:#22b8d9;"></div><div style="width:32px; height:32px; border-radius:8px; background:#38e0e0;"></div></div><div style="font-family:'IBM Plex Sans',monospace; font-size:9px; color:#7b8582; margin-top:5px;">DARK · #22B8D9 → #38E0E0</div></div>
+          </div>
+          <div style="background:#08111a; border:1px solid #1c2f3d; border-radius:14px; padding:14px; color:#eaf2f8; font-family:'IBM Plex Sans',sans-serif;">
+            <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:12px; flex-wrap:wrap;"><span style="font-size:30px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:15px; font-weight:600;">Heading</span><span style="font-size:12px; color:#7d94a6;">Body text</span></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <button style="background:linear-gradient(120deg,#22b8d9,#38e0e0); color:#04141a; border:none; border-radius:10px; padding:7px 15px; font-family:inherit; font-weight:700; font-size:12px; cursor:pointer;">Primary</button>
+              <button style="background:#101d29; color:#eaf2f8; border:1px solid #1c2f3d; border-radius:10px; padding:7px 15px; font-family:inherit; font-weight:600; font-size:12px; cursor:pointer;">Secondary</button>
+              <span style="font-size:10px; font-weight:700; background:rgba(34,184,217,0.18); color:#22b8d9; border-radius:999px; padding:3px 10px;">RUN</span>
+              <span style="font-size:10px; font-weight:700; background:rgba(56,224,224,0.18); color:#38e0e0; border-radius:999px; padding:3px 10px;">PB</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- OPTIONS ROW -->
+  <div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start;">
+
+    <!-- ============ OPTION 1a — GRAPHITE ============ -->
+    <section id="1a" style="--bg:#f4f5f3; --surf:#ffffff; --bd:#e4e6e2; --tx:#14171a; --mut:#6a726f; --acc:#1f7a34; --acc2:#a6e22e; --track:#e7e9e5; --onacc:#ffffff; --soft:rgba(31,122,52,0.10); width: 640px; max-width: 100%; background:#181b1c; border:1px solid #262a2b; border-radius:26px; padding:26px; box-sizing:border-box;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; background:#a6e22e; color:#14171a; border-radius:8px; padding:3px 9px;">1a</span>
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:24px; margin:0; letter-spacing:-0.01em; color:#f4f6f5;">Graphite</h2>
+        </div>
+        <span style="font-size:11px; color:#7b8582; text-transform:uppercase; letter-spacing:0.1em;">Whoop · Apple Fitness</span>
+      </div>
+      <p style="font-size:13.5px; line-height:1.55; color:#9aa2a0; margin:0 0 20px;">Dark-first monochrome with one electric-lime accent. Rings and numbers glow; everything else recedes.</p>
+
+      <!-- previews -->
+      <div style="display:flex; gap:14px; margin-bottom:22px;">
+        <!-- LIGHT -->
+        <div style="flex:1;">
+          <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Light</div>
+          <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Space Grotesk',sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+            <div style="display:flex; justify-content:center; margin-bottom:14px;">
+              <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(var(--acc) 68%, var(--track) 0);">
+                <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-size:30px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span>
+                  <span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">120g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">210g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">58g</div></div>
+            </div>
+            <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+              <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+            </div>
+            <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:600; font-size:13px; cursor:pointer;">Log food</button>
+          </div>
+        </div>
+        <!-- DARK -->
+        <div style="flex:1; --bg:#0c0e0f; --surf:#16191b; --bd:#262a2c; --tx:#f4f6f5; --mut:#8b9391; --acc:#c8f542; --track:#262a2c; --onacc:#0c0e0f; --soft:rgba(200,245,66,0.14);">
+          <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Dark</div>
+          <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Space Grotesk',sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+            <div style="display:flex; justify-content:center; margin-bottom:14px;">
+              <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(var(--acc) 68%, var(--track) 0); box-shadow:0 0 24px rgba(200,245,66,0.18);">
+                <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-size:30px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span>
+                  <span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">120g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">210g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">58g</div></div>
+            </div>
+            <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+              <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+            </div>
+            <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- tokens -->
+      <div style="border-top:1px solid #262a2b; padding-top:18px;">
+        <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:12px;">Palette</div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <div><div style="display:flex; gap:6px;"><div title="bg" style="width:34px; height:34px; border-radius:8px; background:#f4f5f3; border:1px solid #333;"></div><div title="surface" style="width:34px; height:34px; border-radius:8px; background:#fff; border:1px solid #333;"></div><div title="text" style="width:34px; height:34px; border-radius:8px; background:#14171a;"></div><div title="muted" style="width:34px; height:34px; border-radius:8px; background:#6a726f;"></div><div title="accent" style="width:34px; height:34px; border-radius:8px; background:#1f7a34;"></div></div><div style="font-family:'Space Grotesk',monospace; font-size:9px; color:#7b8582; margin-top:5px;">LIGHT · #1F7A34</div></div>
+          <div><div style="display:flex; gap:6px;"><div style="width:34px; height:34px; border-radius:8px; background:#0c0e0f; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#16191b; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#f4f6f5;"></div><div style="width:34px; height:34px; border-radius:8px; background:#8b9391;"></div><div style="width:34px; height:34px; border-radius:8px; background:#c8f542;"></div></div><div style="font-family:'Space Grotesk',monospace; font-size:9px; color:#7b8582; margin-top:5px;">DARK · #C8F542</div></div>
+        </div>
+        <div style="background:#0c0e0f; border:1px solid #262a2c; border-radius:14px; padding:16px; color:#f4f6f5; font-family:'Space Grotesk',sans-serif;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px; flex-wrap:wrap;"><span style="font-size:34px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:16px; font-weight:600;">Section heading</span><span style="font-size:12.5px; color:#8b9391;">Body — Zone 2 endurance</span><span style="font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:#8b9391;">Caption</span></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+            <button style="background:#c8f542; color:#0c0e0f; border:none; border-radius:10px; padding:8px 16px; font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;">Primary</button>
+            <button style="background:#16191b; color:#f4f6f5; border:1px solid #262a2c; border-radius:10px; padding:8px 16px; font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;">Secondary</button>
+            <button style="background:transparent; color:#c8f542; border:none; border-radius:10px; padding:8px 12px; font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;">Ghost</button>
+            <input placeholder="Search foods…" style="flex:1; min-width:120px; background:#16191b; border:1px solid #262a2c; border-radius:10px; padding:8px 12px; color:#f4f6f5; font-family:inherit; font-size:12.5px;" />
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:rgba(200,245,66,0.14); color:#c8f542; border-radius:999px; padding:3px 10px;">RUN</span>
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:#16191b; color:#8b9391; border:1px solid #262a2c; border-radius:999px; padding:3px 10px;">LIFT</span>
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:rgba(200,245,66,0.14); color:#c8f542; border-radius:999px; padding:3px 10px;">PB</span>
+            <span style="font-size:10px; font-weight:600; background:#16191b; color:#8b9391; border:1px solid #262a2c; border-radius:999px; padding:3px 10px;">via Strava</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OPTION 1b — EMBER ============ -->
+    <section id="1b" style="--bg:#f6f2ea; --surf:#fffdf9; --bd:#e7ded0; --tx:#1c1a17; --mut:#7c756a; --acc:#df512a; --acc2:#f0a03e; --track:#ece3d4; --onacc:#ffffff; --soft:rgba(223,81,42,0.10); width: 640px; max-width: 100%; background:#181b1c; border:1px solid #262a2b; border-radius:26px; padding:26px; box-sizing:border-box;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Manrope',sans-serif; font-weight:700; font-size:13px; background:#df512a; color:#fff; border-radius:8px; padding:3px 9px;">1b</span>
+          <h2 style="font-family:'Instrument Serif',serif; font-size:30px; margin:0; letter-spacing:0; color:#f4efe6;">Ember</h2>
+        </div>
+        <span style="font-size:11px; color:#7b8582; text-transform:uppercase; letter-spacing:0.1em;">Runna · Strava</span>
+      </div>
+      <p style="font-size:13.5px; line-height:1.55; color:#9aa2a0; margin:0 0 20px;">Warm editorial paper with a serif display for big numbers and an energetic ember accent. Feels human and motivating.</p>
+
+      <div style="display:flex; gap:14px; margin-bottom:22px;">
+        <!-- LIGHT -->
+        <div style="flex:1;">
+          <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Light</div>
+          <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Manrope',sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+            <div style="display:flex; justify-content:center; margin-bottom:14px;">
+              <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 0deg, var(--acc2), var(--acc) 68%, var(--track) 0);">
+                <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-family:'Instrument Serif',serif; font-size:38px; line-height:1; font-variant-numeric:tabular-nums;">1,480</span>
+                  <span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">120g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">210g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">58g</div></div>
+            </div>
+            <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+              <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+            </div>
+            <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+          </div>
+        </div>
+        <!-- DARK -->
+        <div style="flex:1; --bg:#16130d; --surf:#201c15; --bd:#322c21; --tx:#f4efe6; --mut:#a89e8d; --acc:#f0663c; --acc2:#f0a03e; --track:#322c21; --onacc:#1c140d; --soft:rgba(240,102,60,0.16);">
+          <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Dark</div>
+          <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Manrope',sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+            <div style="display:flex; justify-content:center; margin-bottom:14px;">
+              <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 0deg, var(--acc2), var(--acc) 68%, var(--track) 0);">
+                <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-family:'Instrument Serif',serif; font-size:38px; line-height:1; font-variant-numeric:tabular-nums;">1,480</span>
+                  <span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">120g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">210g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:700; font-variant-numeric:tabular-nums;">58g</div></div>
+            </div>
+            <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:600; font-size:13px;">Easy 8 km</span></div>
+              <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+            </div>
+            <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #262a2b; padding-top:18px;">
+        <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:12px;">Palette</div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <div><div style="display:flex; gap:6px;"><div style="width:34px; height:34px; border-radius:8px; background:#f6f2ea; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#fffdf9; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#1c1a17;"></div><div style="width:34px; height:34px; border-radius:8px; background:#7c756a;"></div><div style="width:34px; height:34px; border-radius:8px; background:#df512a;"></div></div><div style="font-family:'Manrope',monospace; font-size:9px; color:#7b8582; margin-top:5px;">LIGHT · #DF512A</div></div>
+          <div><div style="display:flex; gap:6px;"><div style="width:34px; height:34px; border-radius:8px; background:#16130d; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#201c15; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#f4efe6;"></div><div style="width:34px; height:34px; border-radius:8px; background:#a89e8d;"></div><div style="width:34px; height:34px; border-radius:8px; background:#f0663c;"></div></div><div style="font-family:'Manrope',monospace; font-size:9px; color:#7b8582; margin-top:5px;">DARK · #F0663C</div></div>
+        </div>
+        <div style="background:#16130d; border:1px solid #322c21; border-radius:14px; padding:16px; color:#f4efe6; font-family:'Manrope',sans-serif;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px; flex-wrap:wrap;"><span style="font-family:'Instrument Serif',serif; font-size:40px; line-height:0.9; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:16px; font-weight:700;">Section heading</span><span style="font-size:12.5px; color:#a89e8d;">Body — Zone 2 endurance</span><span style="font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:#a89e8d;">Caption</span></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+            <button style="background:#f0663c; color:#1c140d; border:none; border-radius:10px; padding:8px 16px; font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;">Primary</button>
+            <button style="background:#201c15; color:#f4efe6; border:1px solid #322c21; border-radius:10px; padding:8px 16px; font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;">Secondary</button>
+            <button style="background:transparent; color:#f0663c; border:none; border-radius:10px; padding:8px 12px; font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;">Ghost</button>
+            <input placeholder="Search foods…" style="flex:1; min-width:120px; background:#201c15; border:1px solid #322c21; border-radius:10px; padding:8px 12px; color:#f4efe6; font-family:inherit; font-size:12.5px;" />
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:rgba(240,102,60,0.16); color:#f0663c; border-radius:999px; padding:3px 10px;">RUN</span>
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:#201c15; color:#a89e8d; border:1px solid #322c21; border-radius:999px; padding:3px 10px;">LIFT</span>
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:rgba(240,160,62,0.18); color:#f0a03e; border-radius:999px; padding:3px 10px;">PB</span>
+            <span style="font-size:10px; font-weight:600; background:#201c15; color:#a89e8d; border:1px solid #322c21; border-radius:999px; padding:3px 10px;">via Strava</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OPTION 1c — COBALT ============ -->
+    <section id="1c" style="--bg:#f4f7fb; --surf:#ffffff; --bd:#e2e8f0; --tx:#0f1720; --mut:#5a6b7c; --acc:#2f6bff; --acc2:#16c2c2; --track:#e2e8f0; --onacc:#ffffff; --soft:rgba(47,107,255,0.10); width: 640px; max-width: 100%; background:#181b1c; border:1px solid #262a2b; border-radius:26px; padding:26px; box-sizing:border-box;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:6px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:700; font-size:13px; background:#2f6bff; color:#fff; border-radius:8px; padding:3px 9px;">1c</span>
+          <h2 style="font-family:'Archivo',sans-serif; font-size:24px; font-weight:800; margin:0; letter-spacing:-0.02em; color:#f4f6f5;">Cobalt</h2>
+        </div>
+        <span style="font-size:11px; color:#7b8582; text-transform:uppercase; letter-spacing:0.1em;">Cronometer · Health</span>
+      </div>
+      <p style="font-size:13.5px; line-height:1.55; color:#9aa2a0; margin:0 0 20px;">Cool, clinical and precise. Blue-to-teal gradient rings make dense data feel premium and trustworthy.</p>
+
+      <div style="display:flex; gap:14px; margin-bottom:22px;">
+        <!-- LIGHT -->
+        <div style="flex:1;">
+          <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Light</div>
+          <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Archivo',sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+            <div style="display:flex; justify-content:center; margin-bottom:14px;">
+              <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0);">
+                <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-size:29px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span>
+                  <span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">120g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">210g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">58g</div></div>
+            </div>
+            <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:700; font-size:13px;">Easy 8 km</span></div>
+              <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+            </div>
+            <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+          </div>
+        </div>
+        <!-- DARK -->
+        <div style="flex:1; --bg:#0a0f16; --surf:#111a26; --bd:#1e2b3a; --tx:#eef3f9; --mut:#8494a5; --acc:#4d84ff; --acc2:#22d3d3; --track:#1e2b3a; --onacc:#0a0f16; --soft:rgba(77,132,255,0.16);">
+          <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:8px;">Dark</div>
+          <div style="background:var(--bg); border:1px solid var(--bd); border-radius:22px; padding:16px; color:var(--tx); font-family:'Archivo',sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--mut); margin-bottom:14px;"><span>Wed 23 Jul</span><span style="color:var(--acc); font-weight:700;">TODAY</span></div>
+            <div style="display:flex; justify-content:center; margin-bottom:14px;">
+              <div style="position:relative; width:128px; height:128px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 68%, var(--track) 0); box-shadow:0 0 24px rgba(77,132,255,0.20);">
+                <div style="position:absolute; inset:11px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                  <span style="font-size:29px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">1,480</span>
+                  <span style="font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:12px;">
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Protein</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">120g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Carbs</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">210g</div></div>
+              <div style="flex:1; background:var(--surf); border:1px solid var(--bd); border-radius:12px; padding:8px 6px; text-align:center;"><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--mut);">Fat</div><div style="font-weight:800; font-variant-numeric:tabular-nums;">58g</div></div>
+            </div>
+            <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; padding:12px;">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="font-size:9.5px; font-weight:700; letter-spacing:0.06em; background:var(--soft); color:var(--acc); border-radius:999px; padding:2px 8px;">RUN</span><span style="font-size:11px; color:var(--mut);">7:00 AM</span><span style="font-weight:700; font-size:13px;">Easy 8 km</span></div>
+              <div style="font-size:11.5px; color:var(--mut);">Zone 2 · 48 min · via Strava</div>
+            </div>
+            <button style="width:100%; margin-top:12px; background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:11px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;">Log food</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #262a2b; padding-top:18px;">
+        <div style="font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#7b8582; margin-bottom:12px;">Palette</div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <div><div style="display:flex; gap:6px;"><div style="width:34px; height:34px; border-radius:8px; background:#f4f7fb; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#fff; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#0f1720;"></div><div style="width:34px; height:34px; border-radius:8px; background:#5a6b7c;"></div><div style="width:34px; height:34px; border-radius:8px; background:#2f6bff;"></div><div style="width:34px; height:34px; border-radius:8px; background:#16c2c2;"></div></div><div style="font-family:'Archivo',monospace; font-size:9px; color:#7b8582; margin-top:5px;">LIGHT · #2F6BFF → #16C2C2</div></div>
+          <div><div style="display:flex; gap:6px;"><div style="width:34px; height:34px; border-radius:8px; background:#0a0f16; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#111a26; border:1px solid #333;"></div><div style="width:34px; height:34px; border-radius:8px; background:#eef3f9;"></div><div style="width:34px; height:34px; border-radius:8px; background:#8494a5;"></div><div style="width:34px; height:34px; border-radius:8px; background:#4d84ff;"></div><div style="width:34px; height:34px; border-radius:8px; background:#22d3d3;"></div></div><div style="font-family:'Archivo',monospace; font-size:9px; color:#7b8582; margin-top:5px;">DARK · #4D84FF → #22D3D3</div></div>
+        </div>
+        <div style="background:#0a0f16; border:1px solid #1e2b3a; border-radius:14px; padding:16px; color:#eef3f9; font-family:'Archivo',sans-serif;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:14px; flex-wrap:wrap;"><span style="font-size:34px; font-weight:800; letter-spacing:-0.04em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-size:16px; font-weight:700;">Section heading</span><span style="font-size:12.5px; color:#8494a5;">Body — Zone 2 endurance</span><span style="font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:#8494a5;">Caption</span></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+            <button style="background:linear-gradient(120deg,#2f6bff,#4d84ff); color:#fff; border:none; border-radius:10px; padding:8px 16px; font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;">Primary</button>
+            <button style="background:#111a26; color:#eef3f9; border:1px solid #1e2b3a; border-radius:10px; padding:8px 16px; font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;">Secondary</button>
+            <button style="background:transparent; color:#4d84ff; border:none; border-radius:10px; padding:8px 12px; font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;">Ghost</button>
+            <input placeholder="Search foods…" style="flex:1; min-width:120px; background:#111a26; border:1px solid #1e2b3a; border-radius:10px; padding:8px 12px; color:#eef3f9; font-family:inherit; font-size:12.5px;" />
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:rgba(77,132,255,0.16); color:#4d84ff; border-radius:999px; padding:3px 10px;">RUN</span>
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:#111a26; color:#8494a5; border:1px solid #1e2b3a; border-radius:999px; padding:3px 10px;">LIFT</span>
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.06em; background:rgba(34,211,211,0.16); color:#22d3d3; border-radius:999px; padding:3px 10px;">PB</span>
+            <span style="font-size:10px; font-weight:600; background:#111a26; color:#8494a5; border:1px solid #1e2b3a; border-radius:999px; padding:3px 10px;">via Strava</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <p style="margin:40px 0 0; font-size:13px; color:#6b7370; max-width:760px; line-height:1.6;">Next: pick a direction and I'll build it into a full design-system reference page — spacing scale, elevation, full component set, and the token set exported for both web (CSS vars) and mobile (NativeWind). Then we apply it to the priority screens.</p>
+
+</div>
+</x-dc>
+</body>
+</html>

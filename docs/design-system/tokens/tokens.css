@@ -1,0 +1,99 @@
+/* TrainFuel — Cyan Steel design tokens (web / CedarJS)
+ * Drop these into web/src/index.css, replacing the existing :root block.
+ * Names preserve the app's current --tf-* vars so existing components keep working,
+ * and add the rest of the system. Dark mode is opt-in via <html data-theme="dark">
+ * and also follows the OS setting by default (prefers-color-scheme).
+ */
+
+:root {
+  /* color — light */
+  --tf-bg: #f4f6f8;
+  --tf-surface: #ffffff;
+  --tf-surface-2: #eef2f6;
+  --tf-border: #e0e6ec;
+  --tf-text: #0c1826;
+  --tf-text-muted: #5b6b7b;
+  --tf-accent: #0891b2;
+  --tf-accent-2: #06b6d4;
+  --tf-accent-soft: rgba(8, 145, 178, 0.10);
+  --tf-on-accent: #ffffff;
+  --tf-track: #e0e6ec;
+  --tf-success: #0f9d76;
+  --tf-warning: #d98a1f;
+  --tf-danger: #d1495b;
+
+  /* radius */
+  --tf-radius-sm: 8px;
+  --tf-radius-md: 12px;
+  --tf-radius-lg: 16px;
+  --tf-radius-xl: 22px;
+  --tf-radius-pill: 999px;
+  --tf-radius: 12px; /* legacy alias */
+
+  /* spacing (4px base) */
+  --tf-space-xs: 4px;
+  --tf-space-sm: 8px;
+  --tf-space-md: 12px;
+  --tf-space-lg: 16px;
+  --tf-space-xl: 24px;
+  --tf-space-2xl: 32px;
+  --tf-space-3xl: 48px;
+
+  /* typography */
+  --tf-font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tf-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* elevation */
+  --tf-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --tf-shadow-2: 0 6px 16px rgba(0, 0, 0, 0.24);
+  --tf-shadow-3: 0 16px 36px rgba(0, 0, 0, 0.34);
+
+  /* gradient used on rings, bars, primary buttons */
+  --tf-accent-gradient: linear-gradient(120deg, var(--tf-accent), var(--tf-accent-2));
+}
+
+/* explicit dark theme */
+:root[data-theme='dark'] {
+  --tf-bg: #08111a;
+  --tf-surface: #101d29;
+  --tf-surface-2: #16283a;
+  --tf-border: #1c2f3d;
+  --tf-text: #eaf2f8;
+  --tf-text-muted: #7d94a6;
+  --tf-accent: #22b8d9;
+  --tf-accent-2: #38e0e0;
+  --tf-accent-soft: rgba(34, 184, 217, 0.16);
+  --tf-on-accent: #04141a;
+  --tf-track: #1c2f3d;
+  --tf-success: #34d399;
+  --tf-warning: #f0b23e;
+  --tf-danger: #f76d7f;
+}
+
+/* follow OS setting when no explicit data-theme is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --tf-bg: #08111a;
+    --tf-surface: #101d29;
+    --tf-surface-2: #16283a;
+    --tf-border: #1c2f3d;
+    --tf-text: #eaf2f8;
+    --tf-text-muted: #7d94a6;
+    --tf-accent: #22b8d9;
+    --tf-accent-2: #38e0e0;
+    --tf-accent-soft: rgba(34, 184, 217, 0.16);
+    --tf-on-accent: #04141a;
+    --tf-track: #1c2f3d;
+    --tf-success: #34d399;
+    --tf-warning: #f0b23e;
+    --tf-danger: #f76d7f;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--tf-bg);
+  color: var(--tf-text);
+  font-family: var(--tf-font-sans);
+  line-height: 1.5;
+}

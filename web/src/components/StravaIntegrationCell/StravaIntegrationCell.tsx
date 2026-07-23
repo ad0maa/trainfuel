@@ -47,7 +47,7 @@ export const Empty = () => null
 export const Failure = ({
   error,
 }: CellFailureProps<StravaIntegrationQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 function ConnectButton() {

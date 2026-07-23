@@ -103,7 +103,7 @@ export const Empty = () => (
 export const Failure = ({
   error,
 }: CellFailureProps<TrainingBlocksQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 type Block = TrainingBlocksQuery['trainingBlocks'][number]
