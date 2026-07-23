@@ -5,6 +5,8 @@
 // nightly/backfill re-runs (SPEC.md §3.5: "A nightly job (and on-write
 // triggers where cheap) maintains this table").
 
+import type { QueryResolvers } from 'types/graphql'
+
 import { localDateToUtcMidnight } from 'src/lib/date/localDay'
 import { db } from 'src/lib/db'
 import type { Per100Nutrients } from 'src/lib/nutrition/computeNutrients'
@@ -60,4 +62,27 @@ export async function upsertDailyMetricWeight(
     create: { userId, date, weightKg },
     update: { weightKg },
   })
+}
+
+/**
+ * GraphQL-exposed: the current user's last 'days' days of DailyMetric rows,
+ * for the Progress page's weight-trend chart (SPEC.md §7.1).
+ */
+export const dailyMetrics: QueryResolvers['dailyMetrics'] = async ({
+  days,
+}) => {
+  const userId = context.currentUser.id
+  const since = new Date()
+  since.setUTCDate(since.getUTCDate() - (days ?? 90))
+
+  const rows = await db.dailyMetric.findMany({
+    where: { userId, date: { gte: since } },
+    orderBy: { date: 'asc' },
+    select: { date: true, weightKg: true, intakeKcal: true, targetKcal: true },
+  })
+
+  return rows.map((row) => ({
+    ...row,
+    date: row.date.toISOString().slice(0, 10),
+  }))
 }

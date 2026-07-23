@@ -91,7 +91,9 @@ function ItemRow({ item }: ItemRowProps) {
   return (
     <li className="tf-week-item">
       <div className="tf-week-item-main">
-        <span className={`tf-item-type tf-item-type--${item.type.toLowerCase()}`}>
+        <span
+          className={`tf-item-type tf-item-type--${item.type.toLowerCase()}`}
+        >
           {item.type}
         </span>
         <span className="tf-item-title">{item.title}</span>

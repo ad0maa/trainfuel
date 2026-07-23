@@ -10,6 +10,7 @@
 import { Router, Route, PrivateSet } from '@cedarjs/router'
 
 import { useAuth } from './auth.js'
+import MainLayout from './layouts/MainLayout/MainLayout'
 
 const Routes = () => {
   return (
@@ -18,13 +19,16 @@ const Routes = () => {
       <Route path="/signup" page={SignupPage} name="signup" />
       <Route path="/forgot-password" page={ForgotPasswordPage} name="forgotPassword" />
       <Route path="/reset-password" page={ResetPasswordPage} name="resetPassword" />
-      <PrivateSet unauthenticated="login">
+      <PrivateSet unauthenticated="login" wrap={MainLayout}>
         {/* named "home" (not "dashboard") so the existing dbAuth pages'
             `navigate(routes.home())` post-login/signup/reset redirects
             keep working without touching four generated auth pages */}
         <Route path="/" page={DashboardPage} name="home" />
         <Route path="/plan" page={PlanPage} name="plan" />
         <Route path="/food-log" page={FoodLogPage} name="foodLog" />
+        <Route path="/progress" page={ProgressPage} name="progress" />
+        <Route path="/bmi-calculator" page={BmiCalculatorPage} name="bmiCalculator" />
+        <Route path="/tdee-calculator" page={TdeeCalculatorPage} name="tdeeCalculator" />
         {/* STRAVA_OAUTH_REDIRECT_URI points straight at this route — Strava's
             redirect (?code=...) lands here and SettingsPage reads it itself
             (useLocation), no separate /settings/integrations/... sub-route

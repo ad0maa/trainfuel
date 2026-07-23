@@ -230,6 +230,26 @@ export const unmatchedExternalActivities: QueryResolvers['unmatchedExternalActiv
   }
 
 /**
+ * SPEC.md §7.1's Progress page lift-progression chart: HEVY-sourced
+ * activities (with their exercises) from the last `days` days, oldest
+ * first so the chart can plot chronologically without re-sorting.
+ */
+export const liftActivities: QueryResolvers['liftActivities'] = ({ days }) => {
+  const since = new Date()
+  since.setUTCDate(since.getUTCDate() - (days ?? 90))
+
+  return db.externalActivity.findMany({
+    where: {
+      userId: context.currentUser.id,
+      source: 'HEVY',
+      startedAt: { gte: since },
+    },
+    include: { exercises: true },
+    orderBy: { startedAt: 'asc' },
+  })
+}
+
+/**
  * Manual half of rule 4 ("the user can link or ignore"). Links an
  * unmatched activity to a specific ScheduledItem the auto-matcher didn't
  * pick (or couldn't — e.g. a LIFT logged outside its planned day).

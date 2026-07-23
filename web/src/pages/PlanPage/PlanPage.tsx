@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
-import { Link, routes } from '@cedarjs/router'
 import { Metadata } from '@cedarjs/web'
 
 import GenerateTrainingPlanForm from 'src/components/GenerateTrainingPlanForm'
+import PageHeader from 'src/components/PageHeader/PageHeader'
 import TrainingBlocksCell from 'src/components/TrainingBlocksCell'
 import WeekScheduledItemsCell from 'src/components/WeekScheduledItemsCell'
 
@@ -33,58 +33,50 @@ const PlanPage = () => {
         title="Plan"
         description="Training blocks and weekly schedule"
       />
+      <PageHeader title="Plan" subtitle="Training blocks & weekly schedule" />
 
-      <main className="tf-page">
-        <header className="tf-page-header">
-          <h1>Plan</h1>
-          <Link to={routes.home()} className="tf-nav-link">
-            Today
-          </Link>
-        </header>
+      <section className="tf-plan-section">
+        <h2>Blocks</h2>
+        <TrainingBlocksCell />
+        <GenerateTrainingPlanForm />
+      </section>
 
-        <section className="tf-plan-section">
-          <h2>Blocks</h2>
-          <TrainingBlocksCell />
-          <GenerateTrainingPlanForm />
-        </section>
-
-        <section className="tf-plan-section">
-          <div className="tf-week-nav">
-            <button
-              type="button"
-              onClick={() =>
-                setWeekAnchor((d) => {
-                  const next = new Date(d)
-                  next.setDate(next.getDate() - 7)
-                  return next
-                })
-              }
-            >
-              ← Previous week
-            </button>
-            <h2>
-              Week of {from.toLocaleDateString()} –{' '}
-              {new Date(to.getTime() - 1).toLocaleDateString()}
-            </h2>
-            <button
-              type="button"
-              onClick={() =>
-                setWeekAnchor((d) => {
-                  const next = new Date(d)
-                  next.setDate(next.getDate() + 7)
-                  return next
-                })
-              }
-            >
-              Next week →
-            </button>
-          </div>
-          <WeekScheduledItemsCell
-            from={from.toISOString()}
-            to={to.toISOString()}
-          />
-        </section>
-      </main>
+      <section className="tf-plan-section">
+        <div className="tf-week-nav">
+          <button
+            type="button"
+            onClick={() =>
+              setWeekAnchor((d) => {
+                const next = new Date(d)
+                next.setDate(next.getDate() - 7)
+                return next
+              })
+            }
+          >
+            ← Previous week
+          </button>
+          <h2>
+            Week of {from.toLocaleDateString()} –{' '}
+            {new Date(to.getTime() - 1).toLocaleDateString()}
+          </h2>
+          <button
+            type="button"
+            onClick={() =>
+              setWeekAnchor((d) => {
+                const next = new Date(d)
+                next.setDate(next.getDate() + 7)
+                return next
+              })
+            }
+          >
+            Next week →
+          </button>
+        </div>
+        <WeekScheduledItemsCell
+          from={from.toISOString()}
+          to={to.toISOString()}
+        />
+      </section>
     </>
   )
 }

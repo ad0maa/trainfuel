@@ -11,6 +11,7 @@ import type { TypedDocumentNode } from '@cedarjs/web'
 import { toast } from '@cedarjs/web/toast'
 
 import HevyIntegrationCell from 'src/components/HevyIntegrationCell'
+import PageHeader from 'src/components/PageHeader/PageHeader'
 import ProfileCell from 'src/components/ProfileCell'
 import StravaIntegrationCell from 'src/components/StravaIntegrationCell'
 
@@ -62,27 +63,22 @@ const SettingsPage = () => {
   return (
     <>
       <Metadata title="Settings" description="Integrations and preferences" />
+      <PageHeader title="Settings" subtitle="Profile & integrations" />
 
-      <main className="tf-page">
-        <header className="tf-page-header">
-          <h1>Settings</h1>
-        </header>
+      <section className="tf-plan-section">
+        <h2>Profile</h2>
+        <ProfileCell />
+      </section>
 
-        <section className="tf-plan-section">
-          <h2>Profile</h2>
-          <ProfileCell />
-        </section>
+      <section className="tf-plan-section">
+        <h2>Strava</h2>
+        <StravaIntegrationCell />
+      </section>
 
-        <section className="tf-plan-section">
-          <h2>Strava</h2>
-          <StravaIntegrationCell />
-        </section>
-
-        <section className="tf-plan-section">
-          <h2>Hevy</h2>
-          <HevyIntegrationCell />
-        </section>
-      </main>
+      <section className="tf-plan-section">
+        <h2>Hevy</h2>
+        <HevyIntegrationCell />
+      </section>
     </>
   )
 }
