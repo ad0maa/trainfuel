@@ -9,7 +9,7 @@
 # https://cedarjs.com/docs/app-configuration-cedar-toml
 
 [web]
-  title = "Cedar App"
+  title = "TrainFuel"
   port = 8910
   apiUrl = "/api"
   includeEnvironmentVariables = [
