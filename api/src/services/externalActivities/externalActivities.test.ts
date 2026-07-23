@@ -1,8 +1,11 @@
 import { localDateString, localDayBoundsUtc } from 'src/lib/date/localDay'
 import type { ExternalActivity } from 'src/lib/db'
 import { db } from 'src/lib/db'
+import type { RawHevyWorkout } from 'src/lib/integrations/hevyIngest'
 
 import {
+  deleteExternalActivity,
+  ingestHevyActivity,
   ingestStravaActivity,
   linkExternalActivity,
   unmatchedExternalActivities,
@@ -25,6 +28,23 @@ function rawActivity(overrides: Record<string, unknown> = {}) {
     elapsed_time: 1800,
     distance: 5000,
     calories: 400,
+    ...overrides,
+  }
+}
+
+function rawWorkout(overrides: Partial<RawHevyWorkout> = {}): RawHevyWorkout {
+  return {
+    id: `hevy-${Math.floor(Math.random() * 1_000_000)}`,
+    title: 'Leg Day',
+    start_time: at(18).toISOString(),
+    end_time: at(19).toISOString(),
+    exercises: [
+      {
+        index: 0,
+        title: 'Leg Press',
+        sets: [{ index: 0, type: 'normal', weight_kg: 100, reps: 10 }],
+      },
+    ],
     ...overrides,
   }
 }
@@ -233,6 +253,197 @@ describe('ingestStravaActivity / matching', () => {
       )
       expect(ownerUnmatched.some((a) => a.externalId === '777')).toBe(true)
       expect(ownerUnmatched.some((a) => a.externalId === '888')).toBe(false)
+    }
+  )
+})
+
+describe('ingestHevyActivity / matching', () => {
+  scenario(
+    'matches a single same-day PLANNED LIFT candidate as EXACT and stores exercises',
+    async (scenario: StandardScenario) => {
+      const item = await db.scheduledItem.create({
+        data: {
+          userId: scenario.user.owner.id,
+          type: 'LIFT',
+          title: 'Leg day',
+          scheduledAt: at(17),
+          status: 'PLANNED',
+        },
+      })
+
+      const activity = await ingestHevyActivity(
+        scenario.user.owner.id,
+        rawWorkout({ id: 'hevy-111' })
+      )
+
+      const updated = await db.scheduledItem.findUnique({
+        where: { id: item.id },
+        include: { completion: true },
+      })
+      expect(updated?.status).toBe('COMPLETED')
+      expect(updated?.completion?.matchConfidence).toBe('EXACT')
+      expect(updated?.completion?.source).toBe('HEVY')
+
+      const exercises = await db.externalExercise.findMany({
+        where: { activityId: activity.id },
+        orderBy: { order: 'asc' },
+      })
+      expect(exercises).toHaveLength(1)
+      expect(exercises[0].name).toBe('Leg Press')
+      expect(exercises[0].order).toBe(0)
+      expect(exercises[0].sets).toEqual([
+        {
+          index: 0,
+          type: 'normal',
+          weightKg: 100,
+          reps: 10,
+          distanceMeters: null,
+          durationSeconds: null,
+          rpe: null,
+          customMetric: null,
+        },
+      ])
+    }
+  )
+
+  scenario(
+    'never sets energyKcal or distanceM — Hevy reports neither',
+    async (scenario: StandardScenario) => {
+      const activity = await ingestHevyActivity(
+        scenario.user.owner.id,
+        rawWorkout({ id: 'hevy-222' })
+      )
+      expect(activity.energyKcal).toBeNull()
+      expect(activity.distanceM).toBeNull()
+    }
+  )
+
+  scenario(
+    're-ingesting the same workout is idempotent and refreshes exercises rather than duplicating them',
+    async (scenario: StandardScenario) => {
+      const payload = rawWorkout({
+        id: 'hevy-333',
+        exercises: [
+          {
+            index: 0,
+            title: 'Squat',
+            sets: [{ index: 0, type: 'normal', weight_kg: 80, reps: 5 }],
+          },
+        ],
+      })
+      const first = await ingestHevyActivity(scenario.user.owner.id, payload)
+
+      const edited = rawWorkout({
+        id: 'hevy-333',
+        start_time: payload.start_time,
+        end_time: payload.end_time,
+        exercises: [
+          {
+            index: 0,
+            title: 'Squat',
+            sets: [
+              { index: 0, type: 'normal', weight_kg: 82.5, reps: 5 },
+              { index: 1, type: 'normal', weight_kg: 82.5, reps: 5 },
+            ],
+          },
+        ],
+      })
+      const second = await ingestHevyActivity(scenario.user.owner.id, edited)
+
+      expect(second.id).toBe(first.id)
+      const activityCount = await db.externalActivity.count({
+        where: { source: 'HEVY', externalId: 'hevy-333' },
+      })
+      expect(activityCount).toBe(1)
+
+      const exercises = await db.externalExercise.findMany({
+        where: { activityId: first.id },
+      })
+      expect(exercises).toHaveLength(1) // still one exercise row, not two
+      expect(
+        (exercises[0].sets as Array<{ weightKg: number }>).map(
+          (s) => s.weightKg
+        )
+      ).toEqual([82.5, 82.5])
+    }
+  )
+
+  scenario(
+    'a Hevy workout auto-ticks LIFT, not RUN — compatibleScheduledItemType wiring',
+    async (scenario: StandardScenario) => {
+      const runItem = await db.scheduledItem.create({
+        data: {
+          userId: scenario.user.owner.id,
+          type: 'RUN',
+          title: 'Should not match',
+          scheduledAt: at(18),
+          status: 'PLANNED',
+        },
+      })
+
+      await ingestHevyActivity(
+        scenario.user.owner.id,
+        rawWorkout({ id: 'hevy-444' })
+      )
+
+      const runAfter = await db.scheduledItem.findUnique({
+        where: { id: runItem.id },
+      })
+      expect(runAfter?.status).toBe('PLANNED') // untouched — RUN isn't a candidate for a HEVY/strength activity
+    }
+  )
+})
+
+describe('deleteExternalActivity', () => {
+  scenario(
+    'removes the ExternalActivity row (Hevy "deleted" workout event)',
+    async (scenario: StandardScenario) => {
+      await ingestHevyActivity(
+        scenario.user.owner.id,
+        rawWorkout({ id: 'hevy-555' })
+      )
+
+      await deleteExternalActivity('HEVY', 'hevy-555')
+
+      const found = await db.externalActivity.findUnique({
+        where: {
+          source_externalId: { source: 'HEVY', externalId: 'hevy-555' },
+        },
+      })
+      expect(found).toBeNull()
+    }
+  )
+
+  it('is a safe no-op when the activity was never ingested', async () => {
+    await expect(
+      deleteExternalActivity('HEVY', 'never-existed')
+    ).resolves.not.toThrow()
+  })
+
+  scenario(
+    'preserves the Completion, unlinking externalActivityId (onDelete: SetNull)',
+    async (scenario: StandardScenario) => {
+      const item = await db.scheduledItem.create({
+        data: {
+          userId: scenario.user.owner.id,
+          type: 'LIFT',
+          title: 'Leg day',
+          scheduledAt: at(17),
+          status: 'PLANNED',
+        },
+      })
+      await ingestHevyActivity(
+        scenario.user.owner.id,
+        rawWorkout({ id: 'hevy-666' })
+      )
+
+      await deleteExternalActivity('HEVY', 'hevy-666')
+
+      const completion = await db.completion.findUnique({
+        where: { scheduledItemId: item.id },
+      })
+      expect(completion).not.toBeNull()
+      expect(completion?.externalActivityId).toBeNull()
     }
   )
 })

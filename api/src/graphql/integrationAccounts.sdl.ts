@@ -41,5 +41,12 @@ export const schema = gql`
     why the backfill isn't awaited here.
     """
     connectStrava(code: String!): IntegrationStatus! @requireAuth
+
+    """
+    Validates a pasted Hevy personal API key (requires Hevy Pro) against
+    Hevy's API, stores it (encrypted) on IntegrationAccount, and kicks off an
+    initial workout sync in the background. See DECISIONS.md "M4".
+    """
+    connectHevy(apiKey: String!): IntegrationStatus! @requireAuth
   }
 `

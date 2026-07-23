@@ -1,13 +1,17 @@
 import type { MutationResolvers, QueryResolvers } from 'types/graphql'
 
+import { UserInputError } from '@cedarjs/graphql-server'
+
 import { encryptToken } from 'src/lib/crypto'
 import type { IntegrationAccount } from 'src/lib/db'
 import { db } from 'src/lib/db'
+import { getHevyUserInfo } from 'src/lib/integrations/hevy'
 import {
   exchangeStravaCode,
   getStravaAuthUrl,
 } from 'src/lib/integrations/strava'
 import { logger } from 'src/lib/logger'
+import { pollHevyWorkoutsForUser } from 'src/services/externalActivities/hevyPoll'
 import { backfillStravaActivitiesForUser } from 'src/services/externalActivities/stravaBackfill'
 
 // SPEC.md §4.1's OAuth connect/status surface, adapted from the donor's
@@ -72,6 +76,63 @@ export const connectStrava: MutationResolvers['connectStrava'] = async ({
   // is always re-runnable via `yarn cedar exec backfillStravaActivities`.
   backfillStravaActivitiesForUser(userId).catch(async (error) => {
     logger.error({ error, userId }, 'Strava backfill failed after connect')
+    await db.integrationAccount.update({
+      where: { id: account.id },
+      data: {
+        status: 'ERROR',
+        statusDetail: error instanceof Error ? error.message : String(error),
+      },
+    })
+  })
+
+  return toIntegrationStatus(account)
+}
+
+/**
+ * SPEC.md §4.2 / M4: Hevy's connect flow is just "accept + validate +
+ * encrypt + store" — no OAuth redirect, unlike Strava/Google. Validates the
+ * pasted key with a live call to `GET /v1/user/info` (the cheapest
+ * authenticated Hevy endpoint) before persisting, so a typo'd key surfaces
+ * immediately in the Settings UI rather than silently failing on the first
+ * poll 15 minutes later.
+ */
+export const connectHevy: MutationResolvers['connectHevy'] = async ({
+  apiKey,
+}) => {
+  const trimmedKey = apiKey.trim()
+  if (!trimmedKey) {
+    throw new UserInputError('Hevy API key is required.')
+  }
+  const userId = context.currentUser.id
+
+  const userInfo = await getHevyUserInfo(trimmedKey)
+
+  const account = await db.integrationAccount.upsert({
+    where: { userId_provider: { userId, provider: 'HEVY' } },
+    create: {
+      userId,
+      provider: 'HEVY',
+      apiKey: encryptToken(trimmedKey),
+      meta: { hevyUserId: userInfo.id, hevyUserName: userInfo.name },
+      status: 'OK',
+    },
+    update: {
+      apiKey: encryptToken(trimmedKey),
+      meta: { hevyUserId: userInfo.id, hevyUserName: userInfo.name },
+      status: 'OK',
+      statusDetail: null,
+    },
+  })
+
+  // Fire-and-forget initial poll, not a durable job — same "no job runner
+  // yet" gap as connectStrava's backfill (see DECISIONS.md "M3"/"M4"). With
+  // no stored cursor, this pulls full workout history (Hevy's own default
+  // `since` is the epoch — there's no 30-day-window equivalent for Hevy, see
+  // hevyPoll.ts). A failure is recorded on the account's status rather than
+  // left silent, and is always re-runnable via
+  // `yarn cedar exec pollHevyWorkouts`.
+  pollHevyWorkoutsForUser(userId).catch(async (error) => {
+    logger.error({ error, userId }, 'Hevy poll failed after connect')
     await db.integrationAccount.update({
       where: { id: account.id },
       data: {

@@ -12,13 +12,24 @@ jest.mock('src/lib/integrations/strava', () => ({
 jest.mock('src/services/externalActivities/stravaBackfill', () => ({
   backfillStravaActivitiesForUser: jest.fn(async () => 0),
 }))
+// connectHevy validates the key via a real network call (getHevyUserInfo)
+// and kicks off a fire-and-forget poll — both mocked for the same reason.
+jest.mock('src/lib/integrations/hevy', () => ({
+  getHevyUserInfo: jest.fn(),
+}))
+jest.mock('src/services/externalActivities/hevyPoll', () => ({
+  pollHevyWorkoutsForUser: jest.fn(async () => ({ updated: 0, deleted: 0 })),
+}))
 
 import { decryptToken } from 'src/lib/crypto'
 import { db } from 'src/lib/db'
+import { getHevyUserInfo } from 'src/lib/integrations/hevy'
 import { exchangeStravaCode } from 'src/lib/integrations/strava'
+import { pollHevyWorkoutsForUser } from 'src/services/externalActivities/hevyPoll'
 import { backfillStravaActivitiesForUser } from 'src/services/externalActivities/stravaBackfill'
 
 import {
+  connectHevy,
   connectStrava,
   integrationStatus,
   stravaConnectUrl,
@@ -31,6 +42,12 @@ const mockExchangeStravaCode = exchangeStravaCode as jest.MockedFunction<
 const mockBackfill = backfillStravaActivitiesForUser as jest.MockedFunction<
   typeof backfillStravaActivitiesForUser
 >
+const mockGetHevyUserInfo = getHevyUserInfo as jest.MockedFunction<
+  typeof getHevyUserInfo
+>
+const mockPollHevy = pollHevyWorkoutsForUser as jest.MockedFunction<
+  typeof pollHevyWorkoutsForUser
+>
 
 const originalRedirectUri = process.env.STRAVA_OAUTH_REDIRECT_URI
 
@@ -38,6 +55,8 @@ beforeEach(() => {
   process.env.STRAVA_OAUTH_REDIRECT_URI = 'https://example.com/callback'
   mockExchangeStravaCode.mockReset()
   mockBackfill.mockReset().mockResolvedValue(0)
+  mockGetHevyUserInfo.mockReset()
+  mockPollHevy.mockReset().mockResolvedValue({ updated: 0, deleted: 0 })
 })
 
 afterAll(() => {
@@ -139,6 +158,121 @@ describe('connectStrava', () => {
         },
       })
       expect(decryptToken(account.accessToken!)).toBe('token-2')
+    }
+  )
+})
+
+describe('connectHevy', () => {
+  scenario(
+    'validates the key, encrypts it at rest, and starts a poll',
+    async (scenario: StandardScenario) => {
+      mockCurrentUser({
+        id: scenario.user.owner.id,
+        email: scenario.user.owner.email,
+      })
+      mockGetHevyUserInfo.mockResolvedValue({
+        id: 'hevy-user-1',
+        name: 'Adam',
+        url: 'https://hevy.com/user/adam',
+      })
+
+      const result = await connectHevy({ apiKey: 'plaintext-hevy-key' })
+
+      expect(result.provider).toBe('HEVY')
+      expect(result.connected).toBe(true)
+      expect(result.status).toBe('OK')
+
+      const account = await db.integrationAccount.findUniqueOrThrow({
+        where: {
+          userId_provider: { userId: scenario.user.owner.id, provider: 'HEVY' },
+        },
+      })
+      // Never stored in plaintext.
+      expect(account.apiKey).not.toBe('plaintext-hevy-key')
+      expect(decryptToken(account.apiKey!)).toBe('plaintext-hevy-key')
+      expect((account.meta as { hevyUserId: string }).hevyUserId).toBe(
+        'hevy-user-1'
+      )
+
+      expect(mockGetHevyUserInfo).toHaveBeenCalledWith('plaintext-hevy-key')
+      expect(mockPollHevy).toHaveBeenCalledWith(scenario.user.owner.id)
+    }
+  )
+
+  scenario(
+    'trims whitespace off the pasted key',
+    async (scenario: StandardScenario) => {
+      mockCurrentUser({
+        id: scenario.user.owner.id,
+        email: scenario.user.owner.email,
+      })
+      mockGetHevyUserInfo.mockResolvedValue({
+        id: 'hevy-user-1',
+        name: 'Adam',
+        url: 'https://hevy.com/user/adam',
+      })
+
+      await connectHevy({ apiKey: '  plaintext-hevy-key  \n' })
+
+      expect(mockGetHevyUserInfo).toHaveBeenCalledWith('plaintext-hevy-key')
+    }
+  )
+
+  it('refuses an empty (or whitespace-only) key without calling the API', async () => {
+    await expect(connectHevy({ apiKey: '   ' })).rejects.toThrow(
+      /Hevy API key is required/
+    )
+    expect(mockGetHevyUserInfo).not.toHaveBeenCalled()
+  })
+
+  scenario(
+    're-connecting upserts rather than duplicating the account',
+    async (scenario: StandardScenario) => {
+      mockCurrentUser({
+        id: scenario.user.owner.id,
+        email: scenario.user.owner.email,
+      })
+      mockGetHevyUserInfo.mockResolvedValue({
+        id: 'hevy-user-1',
+        name: 'Adam',
+        url: 'https://hevy.com/user/adam',
+      })
+      await connectHevy({ apiKey: 'key-1' })
+      await connectHevy({ apiKey: 'key-2' })
+
+      const count = await db.integrationAccount.count({
+        where: { userId: scenario.user.owner.id, provider: 'HEVY' },
+      })
+      expect(count).toBe(1)
+
+      const account = await db.integrationAccount.findUniqueOrThrow({
+        where: {
+          userId_provider: { userId: scenario.user.owner.id, provider: 'HEVY' },
+        },
+      })
+      expect(decryptToken(account.apiKey!)).toBe('key-2')
+    }
+  )
+
+  scenario(
+    'a rejected (invalid) key never gets persisted',
+    async (scenario: StandardScenario) => {
+      mockCurrentUser({
+        id: scenario.user.owner.id,
+        email: scenario.user.owner.email,
+      })
+      mockGetHevyUserInfo.mockRejectedValue(
+        new Error('Hevy API request failed: 401 Unauthorized')
+      )
+
+      await expect(connectHevy({ apiKey: 'bad-key' })).rejects.toThrow(/401/)
+
+      const account = await db.integrationAccount.findUnique({
+        where: {
+          userId_provider: { userId: scenario.user.owner.id, provider: 'HEVY' },
+        },
+      })
+      expect(account).toBeNull()
     }
   )
 })

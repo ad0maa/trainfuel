@@ -173,16 +173,41 @@ auto-ticked with source badge → daily calorie target moves. That's the folio d
 
 ---
 
-## Phase 3+ — remaining SPEC milestones (unchanged scope)
+## Phase 3 (M4) — Hevy ✅ done (2026-07-23)
 
-- **M4 Hevy** (poll job, ExternalExercise normalization, lift auto-tick) — reuses M3's
-  job + matching infrastructure, small.
+**Shipped:** `api/src/lib/integrations/{hevy,hevyIngest}.ts` (personal-API-key client
++ pure normalizer, +21 tests — no OAuth/refresh cycle, unlike Strava), `hevyPoll.ts`
+(the poll job, doubling as the initial post-connect sync — Hevy's API has no
+date-windowed backfill call the way Strava's does), `ingestHevyActivity` +
+`deleteExternalActivity` added to `api/src/services/externalActivities/
+externalActivities.ts` (+11 tests: exercise sync, idempotency, LIFT-not-RUN wiring,
+deleted-event handling), `connectHevy` added to
+`api/src/services/integrationAccounts/integrationAccounts.ts` (+5 tests),
+`scripts/pollHevyWorkouts.ts`, and web: `HevyIntegrationCell` wired into
+`SettingsPage`. `matching.ts`'s `compatibleScheduledItemType('strength') → 'LIFT'`
+(built in M3 in anticipation of this) confirmed working as-is — matching engine
+untouched. No schema migration needed (`IntegrationAccount.apiKey`, `Provider.HEVY`,
+`ExternalActivity`/`ExternalExercise` were already in place from M0). Full project
+suite: 30/30 test suites, 228/228 tests; lint and type-check clean. Hevy's actual API
+was verified live (embedded OpenAPI spec extracted from its Swagger UI bundle, not
+guessed) before writing any client code, per SPEC.md §9 — see DECISIONS.md "M4" for
+the retrieval method and every confirmed endpoint shape/gap (notably: no calorie data
+anywhere in Hevy's API, so lift `exerciseKcal` stays 0 unless the same session is also
+logged to Strava; and `/v1/workouts` has no date filter at all, so the since-last-sync
+mechanism SPEC.md §4.2 anticipated is actually `/v1/workouts/events?since=`, a
+different endpoint). Owner checklist item #5 (Hevy Pro + API key) is still open — the
+integration has never been exercised against a real account.
+
+## Phase 4+ — remaining SPEC milestones (unchanged scope)
+
 - **M5 Google Calendar** (push/patch/delete, reminder offsets, nightly reconcile).
 - **M6 Mobile** (Expo: Today/tick, barcode → OFF, HealthKit weight/energy, offline
   queue). The donor's Expo app is a *different* API client (REST/axios) — its screens
   are reference-only; don't port code, the mobile side consumes GraphQL here.
 - **M7 Polish** (Progress screens, Level 2 macros wired to the plan — the
-  `prescription.isLongRun/isQualityRun` flags from M2.5 make this nearly free).
+  `prescription.isLongRun/isQualityRun` flags from M2.5 make this nearly free — plus
+  the lift progression chart, deferred from M4 since it needs no new backend work,
+  just a GraphQL `exercises` field and a chart component).
 
 ## Phase F — fast-path cut line (recommended for "get it done")
 
@@ -190,10 +215,10 @@ To ship for folio + friends soonest, the cut is:
 
 **Ship = Phase 0 → M2.5 → M3 → mini-M7 (Progress page + empty states) → deploy.**
 
-Defer past launch: M4 (Hevy — needs a Hevy Pro sub anyway), M5 (Calendar — needs a
-Google Cloud consent screen), M6 (Mobile — needs an Apple dev account + dev build;
-the web app is responsive enough for friends' phones in the meantime). All three are
-additive and none block the core loop.
+Defer past launch: M4 (Hevy — built, but needs a real Hevy Pro sub/key to actually
+exercise), M5 (Calendar — needs a Google Cloud consent screen), M6 (Mobile — needs an
+Apple dev account + dev build; the web app is responsive enough for friends' phones
+in the meantime). All three are additive and none block the core loop.
 
 Friends-usable also means **hosting becomes the real blocker** (open item #2):
 Postgres + a long-lived process for jobs/webhook → Fly/Render/VPS + managed Postgres
@@ -210,7 +235,7 @@ the Strava webhook needs the public URL.
 | 2 | Register a Strava API application (client id/secret, callback domain) | M3 |
 | 3 | Choose hosting + provision Postgres; set the public webhook URL | M3 launch |
 | 4 | Real product name (or ship as TrainFuel) | M7/deploy |
-| 5 | Hevy Pro + API key | M4 (deferred) |
+| 5 | Hevy Pro + API key | M4 (built, not yet exercised against a real account) |
 | 6 | Google Cloud project + OAuth consent screen | M5 (deferred) |
 | 7 | Apple Developer account (HealthKit entitlement) | M6 (deferred) |
 

@@ -613,6 +613,206 @@ equivalent and is new.
   session) — `.env` (real secrets) confirmed never tracked; only `.env.example`/
   `.env.defaults` are in the repo.
 
+## M4 — Hevy
+
+Per CONSOLIDATION_PLAN.md Phase 3+: "reuses M3's job + matching infrastructure,
+small." No donor equivalent (the `health` Django repo never integrated Hevy) — built
+directly from SPEC.md §4.2 + Hevy's live API, verified at build time per SPEC.md §9's
+"do not code from memory" rule, not guessed from M3's Strava shape.
+
+### Verifying Hevy's API (the build-time-verification step SPEC.md §4.2 requires)
+- Hevy's docs page (`https://api.hevyapp.com/docs/`) is a Swagger UI shell with no
+  plain `openapi.json`/`docs-json` route — the actual OpenAPI 3.0 spec is embedded
+  inline inside `swagger-ui-init.js` (assigned to a `swaggerDoc` object literal at
+  script-parse time, not fetched separately). Retrieved it by `curl`-ing that JS file
+  and evaluating it in a sandboxed Node context (stubbed `window`/`SwaggerUIBundle`
+  globals, captured `swaggerOptions.spec` before the real UI-mount call) rather than
+  reading it off the rendered page — confirmed real, complete, and current as of this
+  session, not reconstructed from memory or documentation summaries.
+- **Confirmed facts that shaped the design** (all read directly off the spec, not
+  assumed):
+  - Auth: a single header `api-key: <key>` on every request — **no OAuth, no token
+    expiry/refresh cycle at all**. The key is a personal one, Hevy Pro only, minted at
+    `https://hevy.com/settings?developer`.
+  - `GET /v1/workouts`: paginated (`page`/`pageSize`, **max `pageSize` 10**, default
+    5) — **no date-filter parameter of any kind**. Not usable for "since last sync."
+  - `GET /v1/workouts/events?since=<ISO date>`: "a paged list of workout events
+    (updates or deletes) since a given date... to allow clients to keep their local
+    cache of workouts up to date" (Hevy's own description) — **this** is the
+    since-last-sync endpoint SPEC.md §4.2 anticipated, not `/v1/workouts` itself.
+    Events are `{type: 'updated', workout: Workout}` or
+    `{type: 'deleted', id, deleted_at}`, ordered newest → oldest, same
+    page/pageSize(≤10) pagination.
+  - `GET /v1/user/info` → `{data: {id, name, url}}` — the cheapest authenticated call,
+    used to validate a pasted key at connect time.
+  - The `Workout` schema has **no calorie/energy field anywhere**, on the workout or
+    on any set. See "energyKcal gap" below.
+  - The `Workout` schema also has no workout-level distance field (individual sets
+    *can* carry `distance_meters`/`duration_seconds` for cardio-style logged
+    exercises, but there's nothing to roll up to an activity-level distance the way
+    Strava's `distance` does) — `ExternalActivity.distanceM` is always null for HEVY.
+  - No `securitySchemes` block and no documented rate-limit values/429 semantics
+    anywhere in the spec (unlike Strava's documented per-15-min/daily limits).
+  - `POST /v1/workouts` and `POST`/`PUT /v1/routines` exist in the live spec,
+    confirming a v2 push is buildable later — not built now, per SPEC.md §4.2's "v1 is
+    read-only" / "structure the client so a future push is additive" instructions.
+
+### Hevy client (`api/src/lib/integrations/hevy.ts`)
+- Deliberately simpler shape than `strava.ts` — no `getAuthUrl`/`exchangeCode`/
+  refresh, since there's no OAuth and no token expiry to manage. Exports
+  `getHevyUserInfo`, `listHevyWorkouts` (kept for parity/manual inspection even though
+  the poll job doesn't use it), and `listHevyWorkoutEvents` (the one the poll job
+  actually uses).
+- **429 backoff (`computeHevyBackoffDelayMs`) ported from Strava's shape anyway**,
+  despite Hevy's spec documenting no rate limits at all — a conservative safety net,
+  not a confirmed requirement. Flagged here so it's not mistaken for a verified limit
+  if revisited later.
+- Same pure-core/thin-shell split as `strava.ts`: only `computeHevyBackoffDelayMs` is
+  unit tested; the fetch wrappers aren't (matching precedent).
+
+### Ingest normalizer (`api/src/lib/integrations/hevyIngest.ts`)
+- `normalizeHevyActivity` always sets `activityType: 'strength'` unconditionally —
+  Hevy is exclusively a strength-training log (no activity-type field exists to read),
+  so there's no type map the way Strava needed one. This flows straight into
+  `compatibleScheduledItemType('strength') → 'LIFT'`, which already existed in
+  `matching.ts` since M3 in anticipation of exactly this milestone — **confirmed
+  working as-is, not modified** (SPEC.md §3.3's matching engine is reused verbatim,
+  per this milestone's brief).
+- **`energyKcal` gap:** always `null` for HEVY-sourced `ExternalActivity` rows —
+  Hevy's API has no calorie data at all (confirmed against the live schema, not
+  assumed). This means §6.2's `exerciseKcal` day-total will only ever get a
+  contribution from lift sessions if the user *also* logs them to Strava (Strava can
+  report `WeightTraining` activities, per M3's notes) — a Hevy-only lift produces zero
+  `exerciseKcal` for the day. Not fixed here (there's no data to fix it with); noted as
+  a real, confirmed product gap rather than a bug.
+- **`distanceM`: always `null`** for the same reason (no workout-level distance field).
+- `durationSec` computed as `end_time − start_time` (Hevy gives no elapsed/moving-time
+  field the way Strava does); `null` if `end_time` is absent or would produce a
+  negative duration (defensive — malformed data shouldn't produce a negative number).
+- Sets are normalized to camelCase (`weightKg`, `distanceMeters`, `durationSeconds`,
+  `customMetric`, etc.) and **every field Hevy provides per set is preserved**, not
+  just the `{reps, weightKg, rpe?}` subset SPEC.md §3.3's `ExternalExercise.sets`
+  comment names as an example shape — the field is `Json` specifically so a richer
+  shape doesn't need a migration, and the extra fields (`type`, `distanceMeters`,
+  `durationSeconds`, `customMetric`) cost nothing to keep for M7's progression chart.
+
+### Ingest + poll (`api/src/services/externalActivities/{externalActivities,hevyPoll}.ts`)
+- **`ingestHevyActivity`** (in `externalActivities.ts`, alongside `ingestStravaActivity`
+  — kept in the same file since both are thin upsert-then-match shells over the same
+  `matchAndComplete`) additionally syncs `ExternalExercise` children on every
+  (re-)ingest via **delete-then-recreate**, not a diff/upsert — `ExternalExercise` has
+  no unique constraint beyond `id`, so there's no natural key to upsert against, and
+  Hevy lets a user edit a past workout's sets after the fact. Cheap at the scale of a
+  single workout's exercise list (single digits to low tens of rows); matches SPEC.md
+  §9's "idempotent everywhere data enters" rule without adding schema.
+- **`deleteExternalActivity(source, externalId)`** — new, generic (not Hevy-specific),
+  handling `/v1/workouts/events`'s `deleted` event type. A `deleteMany` (not
+  `delete`) so it's a safe no-op if the activity was never ingested. Cascades to
+  `ExternalExercise` children; any linked `Completion.externalActivityId` is set to
+  null (schema's existing `onDelete: SetNull`, unchanged) so a previously auto-ticked
+  session's completion **survives** the underlying workout's deletion — SPEC.md never
+  addresses "what if the source activity gets deleted after auto-ticking," and
+  un-completing a session the user actually did, just because they later edited/
+  deleted the Hevy log entry, seemed like the wrong default; this preserves the
+  completion and only drops the now-gone external linkage.
+- **`hevyPoll.ts`'s `pollHevyWorkoutsForUser`** is the M4 equivalent of
+  `stravaBackfill.ts`'s `backfillStravaActivitiesForUser`, but serves **both** the
+  recurring poll *and* the initial post-connect sync — unlike Strava's dedicated
+  30-day-window backfill script, Hevy has no date-bounded "recent activities" call to
+  window (see "no date-filter parameter" above), so the *only* mechanism is
+  `/v1/workouts/events?since=`, and with no stored cursor yet, `since` defaults to the
+  epoch — naturally pulling full workout history on the very first run. This is a
+  deliberate divergence from M3's 30-day backfill, forced by Hevy's API shape, not an
+  oversight.
+- **Cursor semantics:** the stored cursor (`IntegrationAccount.meta.sinceCursor`) is
+  set to the timestamp the **poll started** at, not "now" after processing finishes
+  and not derived from any event's own timestamp. Same safe-windowing principle as
+  Strava's backfill `after` param: a workout created/updated while a poll is
+  in-flight might otherwise race past a cursor that advances only after processing,
+  and get silently skipped forever; starting the next window from the *previous*
+  poll's start time guarantees no gap, at the cost of occasionally re-processing an
+  event — which `ingestHevyActivity`'s upsert and `matchAndComplete`'s rule-6 check
+  both already make a safe no-op.
+- **No `stravaTokens.ts`-style split file needed.** M3 split `getFreshStravaTokens`
+  into its own file specifically to avoid a circular import (`integrationAccounts.ts`
+  ↔ `stravaBackfill.ts`, both needing the same token-refresh helper). Hevy has no
+  refresh cycle — `hevyPoll.ts` decrypts the stored `apiKey` directly via
+  `crypto.ts`'s `decryptToken`, and `integrationAccounts.ts` imports `hevyPoll.ts` the
+  same one-directional way it already imports `stravaBackfill.ts`. No cycle, no split
+  file required — simpler by construction, not by omission.
+- **No `hevyPoll.test.ts`** — matches the existing precedent that `stravaBackfill.ts`
+  (the analogous Strava orchestration shell) has no dedicated test file either; its
+  constituent pieces (`hevy.ts`, `hevyIngest.ts`, `matching.ts`, and
+  `ingestHevyActivity`'s DB behaviour in `externalActivities.test.ts`) are each
+  covered directly.
+
+### Connect flow (`api/src/services/integrationAccounts/integrationAccounts.ts`)
+- **`connectHevy(apiKey)`** — "accept + validate + encrypt + store," no OAuth
+  redirect. Validates the pasted key with a live `getHevyUserInfo` call *before*
+  persisting anything, so a typo'd key surfaces immediately as a GraphQL error in the
+  Settings UI rather than silently failing on the first poll 15 minutes later (a
+  rejected key is confirmed, by test, to never touch the database). Stores
+  `{hevyUserId, hevyUserName}` in `meta`, mirroring Strava's `{athleteId}`. Trims
+  whitespace off the pasted key (a common paste artefact) before validating/storing.
+- Fires the initial `pollHevyWorkoutsForUser` the same fire-and-forget way
+  `connectStrava` fires its backfill — same "no job runner yet" gap, same
+  status/statusDetail error-surfacing on failure, same re-runnability via
+  `yarn cedar exec pollHevyWorkouts`.
+- `IntegrationStatus`'s existing shape (never null, `apiKey` never exposed) needed no
+  changes — it was already provider-generic from M3.
+
+### Poll job invocation (`scripts/pollHevyWorkouts.ts`)
+- Directly mirrors `scripts/backfillStravaActivities.ts`'s `--userId`/`--all` CLI
+  shape. **Nothing in this codebase currently calls it on a timer** — SPEC.md §4.2's
+  "scheduled job every 15 min" is not yet satisfied end-to-end; this script is the
+  thing a real scheduler (hosting-platform cron/scheduled function, system cron, or a
+  future Cedar background job) needs to invoke every 15 minutes once hosting is
+  decided. Same unresolved gap M1 (recurrence materialization) and M3 (backfill,
+  webhook processing) already left open — M4 doesn't close it, just adds one more
+  script waiting on the same decision.
+
+### GraphQL surface
+- **No changes to `externalActivities.sdl.ts`** — M3's note that `ExternalActivity`'s
+  GraphQL type is "deliberately lean... re-add `exercises` when M4 needs them" turned
+  out not to apply: auto-tick itself (this milestone's actual deliverable) is entirely
+  server-side (flips `ScheduledItem.status`), and doesn't need `ExternalExercise` data
+  exposed over GraphQL at all. The lift progression chart SPEC.md §7.1 lists under
+  "Progress" is explicitly an M7 (Polish) deliverable, not M4's — deferring the
+  `exercises` field/resolver again, now to M7, rather than adding dead GraphQL surface
+  ahead of the UI that would consume it.
+- `integrationAccounts.sdl.ts` gained one mutation, `connectHevy(apiKey: String!):
+  IntegrationStatus!` — `Provider.HEVY` and `IntegrationStatus` already existed
+  (added in M3 in anticipation of this milestone).
+
+### Schema
+- **No migration needed.** `IntegrationAccount.apiKey`, `Provider.HEVY`,
+  `ExternalActivity`, and `ExternalExercise` were all already in the schema from M0
+  (per SPEC.md §3.6/§3.3's full-schema-up-front instruction) — M4 is purely additive
+  application code on an already-complete data model.
+
+### Web (`web/src/components/HevyIntegrationCell`, `SettingsPage`)
+- Mirrors `StravaIntegrationCell`'s file/export shape (`QUERY`/`Loading`/`Empty`/
+  `Failure`/`Success`, single `.tsx` file, no generated cell scaffold/mock/test —
+  matching M3's established precedent for these integration cells specifically,
+  overriding the general "always use `yarn cedar generate`" default since the
+  generator's scaffold doesn't match this file shape).
+- The connect UI itself necessarily differs from Strava's: a password-type `<input>`
+  + submit button calling `connectHevy(apiKey)` directly, instead of a redirect
+  button — there's no OAuth flow for `SettingsPage` to intercept a `?code=` from.
+  `SettingsPage.tsx` needed no new `useEffect`/query-param handling as a result, just
+  one new `<section>` importing the cell.
+- `.tf-integration-card` and friends (used by `StravaIntegrationCell`) have no actual
+  CSS rules anywhere in `web/src/index.css` — confirmed pre-existing from M3, not
+  something this milestone introduced or needs to fix. Left as-is for consistency;
+  flagged here so it isn't mistaken for new-in-M4 debt.
+
+### Local dev env for this session
+- This worktree had no `.env` (gitignored, not shared across worktrees) — created one
+  from `.env.example`'s documented values (local Postgres role/DBs, a freshly
+  generated `TOKEN_ENCRYPTION_KEY`) so `yarn cedar test`/`type-check` could run at
+  all. Not a code change; noted only because a from-scratch worktree checkout needs
+  this step before anything in "CI / tooling" above will pass locally.
+
 ## Post-deploy fixes (production, 2026-07-23)
 
 First real users hit the live Vercel deployment and surfaced two gaps immediately —
@@ -684,8 +884,10 @@ both fixed same-day.
 
 1. Real product name — still "TrainFuel" placeholder.
 2. Hosting target — undecided; no host-specific code written.
-3. Hevy Pro subscription + API key — not obtained; integration built to interface only
-   when reached (M4).
+3. Hevy Pro subscription + API key — still not obtained. M4's integration is now
+   fully built and tested against Hevy's live, verified API contract (not a stub),
+   but has never been exercised against a real key/account — connect a real Hevy Pro
+   account and confirm `connectHevy` + a real poll once this is available.
 4. Google Cloud project + OAuth consent screen — not created (M5).
 5. Strava API app registration — not created (M3).
 6. Apple Developer account / HealthKit entitlement — not obtained (M6).
