@@ -10,6 +10,7 @@ import { Metadata, useMutation } from '@cedarjs/web'
 import type { TypedDocumentNode } from '@cedarjs/web'
 import { toast } from '@cedarjs/web/toast'
 
+import HevyIntegrationCell from 'src/components/HevyIntegrationCell'
 import ProfileCell from 'src/components/ProfileCell'
 import StravaIntegrationCell from 'src/components/StravaIntegrationCell'
 
@@ -75,6 +76,11 @@ const SettingsPage = () => {
         <section className="tf-plan-section">
           <h2>Strava</h2>
           <StravaIntegrationCell />
+        </section>
+
+        <section className="tf-plan-section">
+          <h2>Hevy</h2>
+          <HevyIntegrationCell />
         </section>
       </main>
     </>

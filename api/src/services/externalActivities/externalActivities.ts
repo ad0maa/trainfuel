@@ -5,6 +5,8 @@ import { UserInputError } from '@cedarjs/graphql-server'
 import { localDayBoundsUtcForUser } from 'src/lib/date/localDay'
 import type { CompletionSource, Prisma } from 'src/lib/db'
 import { db } from 'src/lib/db'
+import type { RawHevyWorkout } from 'src/lib/integrations/hevyIngest'
+import { normalizeHevyActivity } from 'src/lib/integrations/hevyIngest'
 import type { RawStravaActivity } from 'src/lib/integrations/stravaIngest'
 import { normalizeStravaActivity } from 'src/lib/integrations/stravaIngest'
 import { compatibleScheduledItemType, selectMatch } from 'src/lib/matching'
@@ -62,6 +64,85 @@ export async function ingestStravaActivity(
 
   await matchAndComplete(activity)
   return activity
+}
+
+/**
+ * SPEC.md §4.2 / M4: Hevy equivalent of `ingestStravaActivity`. Called by
+ * `pollHevyWorkoutsForUser` (api/src/services/externalActivities/hevyPoll.ts)
+ * once per workout event pulled from `GET /v1/workouts/events`. Same
+ * idempotent-upsert-then-match shape as Strava, plus syncing the workout's
+ * `ExternalExercise` children (which Strava has none of).
+ *
+ * `ExternalExercise` rows are replaced wholesale (delete-then-recreate) on
+ * every (re-)ingest rather than diffed/upserted — Hevy lets a user edit a
+ * past workout's sets after the fact, and there's no natural per-set key to
+ * upsert against (`ExternalExercise` has no unique constraint beyond `id`).
+ * Delete+recreate is the simplest idempotent way to keep children in sync
+ * with the latest payload, and is cheap at the scale of a single workout's
+ * exercise list (single digits to low tens of rows).
+ */
+export async function ingestHevyActivity(userId: string, raw: RawHevyWorkout) {
+  const normalized = normalizeHevyActivity(raw)
+
+  const activity = await db.externalActivity.upsert({
+    where: {
+      source_externalId: {
+        source: 'HEVY',
+        externalId: normalized.externalId,
+      },
+    },
+    create: {
+      userId,
+      source: 'HEVY',
+      externalId: normalized.externalId,
+      activityType: normalized.activityType,
+      startedAt: normalized.startedAt,
+      durationSec: normalized.durationSec,
+      distanceM: normalized.distanceM,
+      energyKcal: normalized.energyKcal,
+      raw: normalized.raw as unknown as Prisma.InputJsonValue,
+    },
+    update: {
+      activityType: normalized.activityType,
+      startedAt: normalized.startedAt,
+      durationSec: normalized.durationSec,
+      distanceM: normalized.distanceM,
+      energyKcal: normalized.energyKcal,
+      raw: normalized.raw as unknown as Prisma.InputJsonValue,
+    },
+  })
+
+  await db.externalExercise.deleteMany({ where: { activityId: activity.id } })
+  if (normalized.exercises.length > 0) {
+    await db.externalExercise.createMany({
+      data: normalized.exercises.map((exercise) => ({
+        activityId: activity.id,
+        name: exercise.name,
+        order: exercise.order,
+        sets: exercise.sets as unknown as Prisma.InputJsonValue,
+      })),
+    })
+  }
+
+  await matchAndComplete(activity)
+  return activity
+}
+
+/**
+ * Best-effort delete for a Hevy `deleted` workout event
+ * (`GET /v1/workouts/events`'s `DeletedWorkout` shape) — a no-op if the
+ * activity was never ingested (idempotent, same spirit as rule 6). Cascades
+ * to its `ExternalExercise` children; any linked `Completion` is preserved
+ * with `externalActivityId` set to null (schema's `onDelete: SetNull`) so a
+ * previously auto-ticked session doesn't silently un-complete itself.
+ */
+export async function deleteExternalActivity(
+  source: CompletionSource,
+  externalId: string
+) {
+  await db.externalActivity.deleteMany({
+    where: { source, externalId },
+  })
 }
 
 /**
