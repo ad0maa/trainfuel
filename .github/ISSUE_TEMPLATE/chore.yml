@@ -1,0 +1,15 @@
+name: Chore / task
+description: A maintenance task, refactor, or piece of technical work
+title: "[Chore]: "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: What needs doing?
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / acceptance criteria
