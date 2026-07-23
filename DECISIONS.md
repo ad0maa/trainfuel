@@ -613,6 +613,73 @@ equivalent and is new.
   session) — `.env` (real secrets) confirmed never tracked; only `.env.example`/
   `.env.defaults` are in the repo.
 
+## Post-deploy fixes (production, 2026-07-23)
+
+First real users hit the live Vercel deployment and surfaced two gaps immediately —
+both fixed same-day.
+
+### Prisma generator: `prisma-client` → `prisma-client-js`
+- **Root cause:** Prisma 7's new `prisma-client` generator (in use since M0, see the
+  original comment this replaced: "the only way to make Prisma 7 work in both CJS and
+  ESM Cedar apps") is ESM-only — it emits `import`/`export` syntax with a `.mts`
+  extension as a `require(esm)`-interop hack. Vercel's default framework builder traces
+  dependencies with a plain JS parser that can't read TS syntax, so it silently drops
+  every `.mts` file from the deployed bundle. Confirmed via Vercel's runtime error log:
+  `ERR_REQUIRE_ESM: require() of ES Module .../client.mts from .../db.js not supported`,
+  hit 5 times by 2 real users on `/api/auth` — every login attempt crashed the function.
+  No supported CJS workaround upstream: `cedarjs/cedar#1781`.
+- **Fix:** `schema.prisma`'s generator block switched to `prisma-client-js` (the legacy
+  generator — still shipped, real CommonJS output) with `generatedFileExtension = "js"`.
+  That extension setting doesn't change the legacy generator's own output (always
+  `.js`) — it exists because `@cedarjs/project-config` hardcodes an expectation of a
+  `client.<ext>` file (defaulting to `.ts`) to wire up GraphQL↔Prisma type mappers;
+  without it, resolver types silently stop mapping to Prisma models. `db.ts`'s two
+  direct imports of `.../generated/prisma/client.mts` changed to import the directory
+  instead (resolves via the generated package's own `package.json` `main` field).
+- **Verified before pushing, in order:** wiped and regenerated (`client.js` confirmed,
+  not `.mts`), full type-check/lint/test suite, `yarn cedar build`, and — the step that
+  actually would have caught this originally — a smoke test requiring the *compiled*
+  `api/dist/lib/db.js` directly in a plain `node -e` and querying real Postgres.
+  `yarn cedar build` succeeding was never sufficient evidence on its own; Vercel's
+  bundler failure mode here is silent at build time and only breaks at runtime.
+- **Also fixed the same session, unrelated:** Vercel's build log showed "Could not
+  enable corepack because package.json is missing 'packageManager' property," meaning
+  the build was falling back to bundled classic Yarn 1.22 instead of this project's
+  actual Yarn Berry 4.17.1 — risky given `yarn.lock` is in Berry's format. Pinned
+  `"packageManager": "yarn@4.17.1"` in `package.json`.
+- **Also fixed the same session, unrelated:** Vercel's build chain
+  (`yarn cedar build && yarn cedar prisma migrate deploy && yarn cedar data-migrate up`)
+  failed on the last step with "Unknown arguments: data-migrate, up" — `data-migrate`
+  isn't a built-in CLI command, it's the separate `@cedarjs/cli-data-migrate` plugin
+  package, which Cedar's CLI auto-installs on demand locally (interactively) but can't
+  in Vercel's clean, non-interactive install. Added it as an explicit devDependency.
+
+### Missing Profile UI (blocking — no way to complete onboarding at all)
+- **Gap:** no milestone ever built a create/edit surface for `Profile`, despite nearly
+  everything depending on one existing (`todayEnergySummary` throws without it; the
+  plan generator needs `Profile.timezone`). A first-time user could sign up but had no
+  path to enter sex/birth date/height/weight/timezone — the Dashboard just showed
+  "Complete your profile..." with no link anywhere to do so.
+- **Fix:** `api/src/graphql/profile.sdl.ts` + `api/src/services/profile/` — `myProfile`
+  query (nullable — null for a brand-new user) and a `saveProfile` upsert mutation (one
+  Profile per user, no separate create/update split). `web/src/components/ProfileForm`
+  + `ProfileCell`, wired into a new "Profile" section on SettingsPage.
+- **`ProfileCell` deliberately exports no `Empty`.** Cedar's cell machinery only routes
+  to `Empty` when the query result is empty *and* `Empty` is exported
+  (`createCell.js`: `if (isEmpty(data) && Empty)`) — omitting it means `Success` always
+  renders, so the same form doubles as the onboarding screen (`myProfile: null` case)
+  and the edit screen, distinguished by a single `{!myProfile && <hint/>}` check inside
+  `Success` rather than a separate empty-state component.
+- **Implemented the deferred `weeklyWeightDeltaKg` clamp while building this** (flagged
+  since CONSOLIDATION_PLAN.md's M2.5 section, never acted on): `saveProfile` rejects
+  values outside `[-1.0, 0.5]` kg/week, mirroring the donor's
+  `MAX_DEFICIT_PER_DAY`/`MAX_SURPLUS_PER_DAY` caps. This was the first time this field
+  had a write path at all, so it's the natural (and only) point to enforce it.
+- **Strava "Connect" button UX fixed in the same pass:** with no `STRAVA_CLIENT_ID`
+  configured (expected — the owner hasn't registered a Strava app yet), the button was
+  silently, permanently disabled with zero explanation (`useQuery`'s `error` was never
+  read). Now shows "Strava isn't configured on this deployment yet" instead.
+
 ## Open items carried from SPEC.md §10 (not yet resolved)
 
 1. Real product name — still "TrainFuel" placeholder.

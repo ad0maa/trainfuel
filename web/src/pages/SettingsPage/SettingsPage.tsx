@@ -10,6 +10,7 @@ import { Metadata, useMutation } from '@cedarjs/web'
 import type { TypedDocumentNode } from '@cedarjs/web'
 import { toast } from '@cedarjs/web/toast'
 
+import ProfileCell from 'src/components/ProfileCell'
 import StravaIntegrationCell from 'src/components/StravaIntegrationCell'
 
 // STRAVA_OAUTH_REDIRECT_URI (.env.example) points straight at this page —
@@ -65,6 +66,11 @@ const SettingsPage = () => {
         <header className="tf-page-header">
           <h1>Settings</h1>
         </header>
+
+        <section className="tf-plan-section">
+          <h2>Profile</h2>
+          <ProfileCell />
+        </section>
 
         <section className="tf-plan-section">
           <h2>Strava</h2>

@@ -53,7 +53,20 @@ export const Failure = ({
 function ConnectButton() {
   // Fetched eagerly (cheap — a single string) so the button is immediately
   // clickable rather than round-tripping on click.
-  const { data, loading } = useQuery(STRAVA_CONNECT_URL_QUERY)
+  const { data, loading, error } = useQuery(STRAVA_CONNECT_URL_QUERY)
+
+  // STRAVA_CLIENT_ID/STRAVA_OAUTH_REDIRECT_URI not being configured on this
+  // deployment throws server-side (see stravaConnectUrl in
+  // integrationAccounts.ts) — surface that as a real message rather than a
+  // silently-disabled button with no explanation.
+  if (error) {
+    return (
+      <p className="tf-integration-error">
+        Strava isn&apos;t configured on this deployment yet (no STRAVA_CLIENT_ID
+        set).
+      </p>
+    )
+  }
 
   return (
     <button
