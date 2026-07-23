@@ -18,15 +18,25 @@ datasource db {
   extensions = [pg_trgm]
 }
 
-// This specific combination of settings is the only way to make Prisma 7 work
-// in both CJS and ESM Cedar apps.
-// See https://github.com/cedarjs/cedar/pull/1761 for more info
+// `prisma-client` (Prisma 7's new TS-native generator) is ESM-only — it
+// always emits import/export syntax, just with a `.mts` extension as a hack
+// to let Node's `require(esm)` interop load it from CJS. Vercel's default
+// framework builder traces dependencies with a plain JS parser that can't
+// read TS syntax, so it silently drops every `.mts` file from the deployed
+// bundle, producing ERR_REQUIRE_ESM/ERR_MODULE_NOT_FOUND at runtime.
+// Confirmed upstream bug, no supported CJS workaround: cedarjs/cedar#1781.
+// Switched to the legacy `prisma-client-js` generator instead — real
+// CommonJS output, nothing for Vercel's parser to choke on.
+// `generatedFileExtension = "js"` doesn't affect the generator's own output
+// (prisma-client-js always emits .js); it's there because
+// @cedarjs/project-config hardcodes an expectation of `client.<ext>`
+// (defaulting to `.ts`) to wire up GraphQL↔Prisma type mappers — without
+// this hint it looks for `client.ts`, doesn't find it, and every generated
+// resolver type silently stops being mapped to its Prisma model.
 generator client {
-  provider               = "prisma-client"
+  provider               = "prisma-client-js"
   output                 = "./generated/prisma"
-  moduleFormat           = "cjs"
-  generatedFileExtension = "mts"
-  importFileExtension    = "mts"
+  generatedFileExtension = "js"
   previewFeatures        = ["postgresqlExtensions"]
 }
 

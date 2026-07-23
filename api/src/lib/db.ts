@@ -2,13 +2,13 @@
 // for options.
 
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from 'api/db/generated/prisma/client.mts'
+import { PrismaClient } from 'api/db/generated/prisma'
 
 import { emitLogLevels, handlePrismaLogging } from '@cedarjs/api/logger'
 
 import { logger } from './logger.js'
 
-export * from 'api/db/generated/prisma/client.mts'
+export * from 'api/db/generated/prisma'
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
