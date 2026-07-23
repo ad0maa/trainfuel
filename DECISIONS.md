@@ -915,6 +915,142 @@ flagged this as a fallback to evaluate; it's now built.
   codegen introspects a locally-running `yarn cedar dev api` (this api disables
   introspection in production by default, so it can't point at the deployed URL).
 
+## M7 — Polish (app shell, BMI/TDEE tools, Level 2 macros, Progress page)
+
+Per CONSOLIDATION_PLAN.md's fast-path ("mini-M7 = Progress page + empty
+states"), extended to also cover the full M7 SPEC.md §8 bullet ("Level 2
+periodized macros wired to plan... plus the lift progression chart") and a
+sidebar app-shell redesign requested alongside it.
+
+### App shell (sidebar layout + theme toggle)
+- **New CedarJS layout, `web/src/layouts/MainLayout/`**, wraps the
+  `PrivateSet` in `Routes.tsx` (`<PrivateSet ... wrap={MainLayout}>`),
+  replacing every page's own `<header className="tf-page-header">` +
+  inline nav links with one persistent sidebar (Menu: Today/Plan/Food
+  Log/Progress; Tools: BMI/TDEE calculators; footer: Settings + a user
+  chip with logout) and a sticky topbar.
+- **Per-page title/subtitle via context, not props/routing metadata**: a
+  `PageHeaderContext` (default value is a no-op `setHeader`, not `null`)
+  lets a `<PageHeader title=... subtitle=... action=?/>` component rendered
+  by each page hand its heading to the layout's topbar. The no-op default
+  specifically keeps the existing generated `render(<DashboardPage />)`
+  isolation tests working without a `MainLayout` wrapper in the tree.
+- **Theme toggle**: `useTheme()` (`web/src/layouts/MainLayout/useTheme.ts`)
+  persists an explicit choice to `localStorage` and sets
+  `document.documentElement.dataset.theme`; with no explicit choice it
+  tracks `prefers-color-scheme` live (a `matchMedia` change listener) —
+  this mirrors `tokens.css`'s own `:root[data-theme]` /
+  `prefers-color-scheme` precedence (already shipped in M2's design-system
+  pass) rather than introducing new CSS.
+- Sidebar links use CedarJS's `NavLink` (not `Link`) for `activeClassName`
+  — plain `Link` has no active-state prop; easy to miss since both are
+  exported side-by-side from `@cedarjs/router`.
+
+### BMI & TDEE calculator tools
+- BMI: pure client-side (`web/src/pages/BmiCalculatorPage`), no service —
+  it's arithmetic, not app state.
+- TDEE: reuses `api/src/lib/energy`'s existing `calculateBmr` +
+  `ACTIVITY_BASELINE_MULTIPLIER` via a new `tdeeEstimate(input): TdeeEstimate!`
+  query (`dailySummary.sdl.ts`/`.ts`) rather than reimplementing Mifflin-St
+  Jeor in the browser — same pure-core/thin-shell precedent as everything
+  else in that module. Both tools prefill from `myProfile` where available
+  but never write back to it (scratch calculators, not profile edit forms).
+
+### Level 2 macro periodization (SPEC.md §6.3)
+- **New pure modules**: `api/src/lib/energy/dayType.ts` (`resolveDayType`,
+  the LONG_RUN > QUALITY_RUN > TRAINING > REST priority from a day's
+  RUN/LIFT `ScheduledItem`s, reading `prescription.isLongRun`/
+  `isQualityRun` — the flags M2.5's plan generator has written since it
+  was built, previously inert) and `api/src/lib/energy/level2Macros.ts`
+  (`calculateLevel2Macros`: protein 2.0 g/kg or `Profile.proteinTargetGPerDay`
+  override; carbs 5/4/3/2.5 g/kg by day type, stepping down 0.5 g/kg at a
+  time if fat would breach its 0.6 g/kg floor; a `fatFlooredAtMin` flag
+  mirrors Level 1's `flooredAtBmr` diagnostic pattern for symmetry). Both
+  fully unit tested alongside `bmr.ts`/`level1Target.ts`.
+- **Day type computed live on every `todayEnergySummary` call**, not cached
+  from "the night before" per SPEC.md's stability suggestion — an accepted
+  v1 simplification (same category as the RRULE/DST and plan-generator
+  07:00-anchor simplifications already flagged elsewhere in this file);
+  revisit if live recomputation ever produces a visibly unstable morning
+  target.
+- **Wired into `dailySummary.sdl.ts`/`.ts`**: `DailyEnergySummary` gained
+  `targetProteinG`/`targetCarbsG`/`targetFatG`/`dayType`; `todayEnergySummary`
+  persists all three target macros into `DailyMetric` alongside the
+  existing `targetKcal` write (those columns were reserved since M0/§3.5
+  but never written until now). `DailyEnergySummaryCell` (used by both
+  Dashboard and Food Log) shows target-vs-logged for each macro plus a
+  day-type badge.
+- **Gotcha hit while building this — re-triggered the exact bug M1's
+  DECISIONS.md already documented**: a Markdown-style `` `days` `` inline
+  code span inside a `"""..."""` SDL description (in the new
+  `dailyMetrics.sdl.ts`, below) silently broke type generation with a
+  babel error far from the real cause. Fixed the same way as before —
+  single quotes, not backticks, in SDL doc comments. Worth a lint rule if
+  this happens a third time.
+
+### Progress page (weight trend + lift progression)
+- **Chart library: `recharts` (3.10.0)**, per SPEC.md §7.1's own suggestion
+  ("Recharts or similar — pick one, record in DECISIONS.md"). Needed an
+  explicit `react-is` dependency add alongside it — yarn's post-resolution
+  validation flagged it as an unmet peer of `recharts` otherwise.
+- **New `dailyMetrics(days: Int = 90): [DailyMetricPoint!]!` query**
+  (`api/src/graphql/dailyMetrics.sdl.ts`, resolver added to the existing
+  `api/src/services/dailyMetrics/dailyMetrics.ts`, which previously only
+  had the internal, non-GraphQL `upsertDailyIntakeRollup` helper).
+  **Named `DailyMetricPoint`, not `DailyMetric`** — CedarJS's gqlorm
+  type-mapping (`all-gqlorm.d.ts`) infers a GraphQL type's resolver field
+  types from any Prisma model of the *same name*, which fought this
+  resolver's transformed `date` (a plain `YYYY-MM-DD` string, not the raw
+  `Date` column) with a confusing "`string` not assignable to `Date`"
+  error. Renaming the GraphQL type sidesteps the auto-mapping entirely —
+  worth remembering for any future GraphQL type that reshapes a Prisma
+  model's data rather than passing it through.
+- **New `liftActivities(days: Int = 90): [ExternalActivity!]!` query** +
+  a new `exercises: [ExternalExercise!]!` field on `ExternalActivity`
+  (`externalActivities.sdl.ts`/`.ts`) — M3's note that this field was
+  "deliberately lean, re-add `exercises` when M4 needs them" turned out to
+  apply to M7 instead (M4's auto-tick matching never needed it server-side;
+  M7's chart is the first consumer). The Prisma relation is already named
+  `exercises`, so no field resolver was needed beyond `include: { exercises:
+  true }` in the query.
+- **Web**: `ProgressPage` — a weight-trend `LineChart` (raw points + a
+  simple EMA trend line, per SPEC.md §7.1's explicit "simple EMA fine in
+  v1" allowance) and an exercise-picker-driven lift-progression `LineChart`
+  (top-set weight per session, computed client-side from each exercise's
+  opaque `sets` JSON). Both show an empty state rather than a blank chart
+  when there's no data yet.
+
+### Environment issues found (not fixed — pre-existing, out of this
+### milestone's scope, flagged for whoever picks them up)
+- **`yarn cedar type-check web` has always been broken** (confirmed via
+  `git stash` against the pre-M7 baseline): the already-documented
+  `@cedarjs/vite@5.0.0` peer-dependency metadata bug (see "Framework"
+  section above — it still requests `@cedarjs/router`/`@cedarjs/auth@4.2.0`)
+  causes yarn to hoist a stale 4.2.0 copy of both packages to the
+  workspace root, alongside the correct 5.0.0 copies nested in `web/`.
+  Consequence beyond the known cosmetic `YN0060` warning: TypeScript's
+  `AvailableRoutes`/`AuthContextInterface` *ambient module augmentations*
+  (declared in `.cedar/types/includes/*.d.ts`, which resolve `@cedarjs/router`
+  from the workspace root and thus see the stale 4.2.0 copy) don't merge
+  into the `@cedarjs/router`/`@cedarjs/auth-dbauth-web` modules that `web/src/*`
+  actually imports (which resolve to the correct nested 5.0.0 copies) —
+  every `routes.xyz()` call and `useAuth().currentUser` access type-errors
+  project-wide, on old code and new alike. `yarn dedupe` does not remove
+  the stale copy (yarn keeps it because `@cedarjs/vite`'s metadata
+  genuinely — if wrongly — requests it). Not fixed here, matching this
+  project's own prior call on the same bug ("safe to ignore... revisit if
+  a `@cedarjs/vite@5.0.1+` lands") — a real fix would mean a
+  `packageExtensions` override correcting `@cedarjs/vite`'s peer-dependency
+  metadata, which is a tooling change independent of this milestone's
+  features.
+- **ESLint was linting generated/build output** (`web/types/graphql.d.ts`,
+  and a stale gitignored `web/dist/` left over from an earlier build) —
+  neither is excluded by `@cedarjs/eslint-config`'s defaults, and flat-config
+  ESLint doesn't consult `.gitignore` on its own. Fixed: deleted the stale
+  `web/dist/` (pure build output) and added an `ignores` entry to this
+  project's own `eslint.config.mjs` for `**/types/graphql.d.ts` and
+  `.cedar/**`.
+
 ## Open items carried from SPEC.md §10 (not yet resolved)
 
 1. Real product name — still "TrainFuel" placeholder.

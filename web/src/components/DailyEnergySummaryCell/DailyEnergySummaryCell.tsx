@@ -20,6 +20,10 @@ export const QUERY: TypedDocumentNode<
       date
       targetKcal
       flooredAtBmr
+      targetProteinG
+      targetCarbsG
+      targetFatG
+      dayType
       intakeKcal
       intakeProteinG
       intakeCarbsG
@@ -51,6 +55,13 @@ function round(n: number): number {
   return Math.round(n)
 }
 
+const DAY_TYPE_LABELS: Record<string, string> = {
+  LONG_RUN: 'Long run day',
+  QUALITY_RUN: 'Quality run day',
+  TRAINING: 'Training day',
+  REST: 'Rest day',
+}
+
 export const Success = ({
   todayEnergySummary,
 }: CellSuccessProps<
@@ -63,6 +74,10 @@ export const Success = ({
     intakeProteinG,
     intakeCarbsG,
     intakeFatG,
+    targetProteinG,
+    targetCarbsG,
+    targetFatG,
+    dayType,
     flooredAtBmr,
   } = todayEnergySummary
   const remaining = targetKcal - intakeKcal
@@ -73,6 +88,12 @@ export const Success = ({
 
   return (
     <div className="tf-energy-summary">
+      <div className="tf-energy-summary-daytype">
+        <span className="tf-badge tf-badge-ok">
+          {DAY_TYPE_LABELS[dayType] ?? dayType}
+        </span>
+      </div>
+
       <div
         className="tf-energy-ring"
         role="img"
@@ -97,15 +118,21 @@ export const Success = ({
         </div>
         <div>
           <dt>Protein</dt>
-          <dd>{round(intakeProteinG)} g</dd>
+          <dd>
+            {round(intakeProteinG)} / {round(targetProteinG)} g
+          </dd>
         </div>
         <div>
           <dt>Carbs</dt>
-          <dd>{round(intakeCarbsG)} g</dd>
+          <dd>
+            {round(intakeCarbsG)} / {round(targetCarbsG)} g
+          </dd>
         </div>
         <div>
           <dt>Fat</dt>
-          <dd>{round(intakeFatG)} g</dd>
+          <dd>
+            {round(intakeFatG)} / {round(targetFatG)} g
+          </dd>
         </div>
       </dl>
 

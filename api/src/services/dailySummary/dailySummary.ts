@@ -8,10 +8,14 @@ import {
 } from 'src/lib/date/localDay'
 import { db } from 'src/lib/db'
 import {
+  ACTIVITY_BASELINE_MULTIPLIER,
   calculateAge,
   calculateBmr,
   calculateLevel1Target,
+  calculateLevel2Macros,
+  resolveDayType,
 } from 'src/lib/energy'
+import type { DayTypeScheduledItemInput } from 'src/lib/energy'
 import type { Per100Nutrients } from 'src/lib/nutrition/computeNutrients'
 import { computeDailyIntakeRollup } from 'src/lib/nutrition/dailyIntakeRollup'
 
@@ -98,6 +102,38 @@ export const todayEnergySummary: QueryResolvers['todayEnergySummary'] =
       weeklyWeightDeltaKg: profile.weeklyWeightDeltaKg,
     })
 
+    // Level 2 (SPEC.md §6.3): day type from today's planned (non-template)
+    // RUN/LIFT sessions. Computed live on every call rather than cached
+    // from "the night before" per spec's stability suggestion — an
+    // accepted v1 simplification, see DECISIONS.md.
+    const scheduledItemsToday = await db.scheduledItem.findMany({
+      where: {
+        userId,
+        isTemplate: false,
+        type: { in: ['RUN', 'LIFT'] },
+        scheduledAt: { gte: startUtc, lt: endUtc },
+      },
+      select: { type: true, durationMin: true, prescription: true },
+    })
+    const dayType = resolveDayType(
+      scheduledItemsToday.map(
+        (item): DayTypeScheduledItemInput => ({
+          type: item.type,
+          durationMin: item.durationMin,
+          prescription: item.prescription as unknown as {
+            isLongRun?: boolean
+            isQualityRun?: boolean
+          } | null,
+        })
+      )
+    )
+    const level2 = calculateLevel2Macros({
+      targetKcal: level1.targetKcal,
+      weightKg,
+      dayType,
+      proteinTargetGPerDayOverride: profile.proteinTargetGPerDay,
+    })
+
     const date = localDateToUtcMidnight(dateStr)
     const entries = await db.foodLogEntry.findMany({
       where: { userId, loggedFor: date },
@@ -109,16 +145,48 @@ export const todayEnergySummary: QueryResolvers['todayEnergySummary'] =
       }))
     )
 
+    const targetFields = {
+      targetKcal: level1.targetKcal,
+      targetProteinG: level2.proteinG,
+      targetCarbsG: level2.carbsG,
+      targetFatG: level2.fatG,
+    }
+
     await db.dailyMetric.upsert({
       where: { userId_date: { userId, date } },
-      create: { userId, date, targetKcal: level1.targetKcal, ...intake },
-      update: { targetKcal: level1.targetKcal },
+      create: { userId, date, ...targetFields, ...intake },
+      update: targetFields,
     })
 
     return {
       date: dateStr,
-      targetKcal: level1.targetKcal,
       flooredAtBmr: level1.flooredAtBmr,
+      dayType: level2.dayType,
+      ...targetFields,
       ...intake,
     }
   }
+
+/**
+ * Standalone BMR/TDEE estimate for the TDEE calculator tool (SPEC.md
+ * §7.1's Tools section). Reuses the exact same pure functions as
+ * todayEnergySummary rather than reimplementing Mifflin-St Jeor client-side
+ * — see DECISIONS.md's pure-core/thin-shell precedent for api/src/lib/energy.
+ * Takes its inputs directly (no Profile/DailyMetric read) so it works as a
+ * scratch calculator before a profile exists.
+ */
+export const tdeeEstimate: QueryResolvers['tdeeEstimate'] = ({ input }) => {
+  const age = calculateAge({
+    birthDate: new Date(input.birthDate),
+    asOf: new Date(),
+  })
+  const bmr = calculateBmr({
+    sex: input.sex,
+    weightKg: input.weightKg,
+    heightCm: input.heightCm,
+    age,
+  })
+  const tdee = bmr * ACTIVITY_BASELINE_MULTIPLIER[input.activityBaseline]
+
+  return { bmr, tdee }
+}
