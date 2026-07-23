@@ -54,7 +54,7 @@ export const Loading = () => <div className="tf-loading">Loading profile…</div
 export const Failure = ({
   error,
 }: CellFailureProps<MyProfileQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 export const Success = ({

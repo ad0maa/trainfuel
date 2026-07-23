@@ -81,7 +81,7 @@ export const Empty = () => (
 export const Failure = ({
   error,
 }: CellFailureProps<TodayScheduledItemsQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 const TYPE_LABEL: Record<string, string> = {
@@ -147,7 +147,9 @@ export const Success = ({
               className={`tf-item tf-item--${item.status.toLowerCase()}`}
             >
               <div className="tf-item-main">
-                <span className="tf-item-type">
+                <span
+                  className={`tf-item-type tf-item-type--${item.type.toLowerCase()}`}
+                >
                   {TYPE_LABEL[item.type] ?? item.type}
                 </span>
                 <span className="tf-item-time">

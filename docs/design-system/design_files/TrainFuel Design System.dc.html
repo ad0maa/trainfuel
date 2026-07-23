@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; }
+  input, textarea, select, button { font-family: 'IBM Plex Sans', sans-serif; }
+  ::placeholder { color: var(--mut); opacity: 0.7; }
+  input[type=range] { accent-color: var(--acc); }
+  input[type=checkbox] { accent-color: var(--acc); }
+</style>
+</helmet>
+
+<div style="--bg:#08111a; --surf:#101d29; --surf2:#16283a; --bd:#1c2f3d; --tx:#eaf2f8; --mut:#7d94a6; --acc:#22b8d9; --acc2:#38e0e0; --track:#1c2f3d; --onacc:#04141a; --soft:rgba(34,184,217,0.16); --success:#34d399; --warn:#f0b23e; --danger:#f76d7f; font-family:'IBM Plex Sans', sans-serif;">
+<div style="{{ themeVars }}">
+<div style="background:var(--bg); color:var(--tx); min-height:100vh;">
+
+  <!-- TOP BAR -->
+  <div style="position:sticky; top:0; z-index:20; backdrop-filter:blur(12px); background:color-mix(in srgb, var(--bg) 78%, transparent); border-bottom:1px solid var(--bd);">
+    <div style="max-width:1100px; margin:0 auto; padding:16px clamp(20px,4vw,48px); display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(140deg,var(--acc),var(--acc2)); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--onacc); font-size:16px;">T</div>
+        <div>
+          <div style="font-weight:600; font-size:15px; letter-spacing:-0.01em;">TrainFuel Design System</div>
+          <div style="font-size:11.5px; color:var(--mut); letter-spacing:0.02em;">Cyan Steel · IBM Plex Sans</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; background:var(--surf); border:1px solid var(--bd); border-radius:11px; padding:4px;">
+        <button onClick="{{ setLight }}" style="{{ segLightStyle }}">Light</button>
+        <button onClick="{{ setDark }}" style="{{ segDarkStyle }}">Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1100px; margin:0 auto; padding:44px clamp(20px,4vw,48px) 100px;">
+
+    <!-- INTRO -->
+    <div style="max-width:640px; margin-bottom:56px;">
+      <h1 style="font-size:clamp(30px,4.5vw,44px); font-weight:600; letter-spacing:-0.025em; margin:0 0 14px; line-height:1.05;">Cyan Steel</h1>
+      <p style="font-size:16px; line-height:1.6; color:var(--mut); margin:0; text-wrap:pretty;">The foundations and components that build TrainFuel — cool, clinical, data-first. Every token is defined for light and dark, and named to map cleanly onto CSS variables (web) and NativeWind theme keys (mobile).</p>
+    </div>
+
+    <!-- ========== FOUNDATIONS ========== -->
+    <div style="font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--acc); margin-bottom:22px;">01 · Foundations</div>
+
+    <!-- Color -->
+    <section style="margin-bottom:52px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 4px;">Color tokens</h2>
+      <p style="font-size:13.5px; color:var(--mut); margin:0 0 22px;">Semantic roles — swatches follow the active theme; hex for both listed below each.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px;">
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--bg); border-bottom:1px solid var(--bd);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Background</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #F4F6F8 · D #08111A</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--surf); border-bottom:1px solid var(--bd); box-shadow:inset 0 0 0 1px var(--bd);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Surface</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #FFFFFF · D #101D29</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--bd);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Border</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #E0E6EC · D #1C2F3D</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--tx);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Text</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #0C1826 · D #EAF2F8</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--mut);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Text muted</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #5B6B7B · D #7D94A6</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:linear-gradient(120deg,var(--acc),var(--acc2));"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Accent</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #0891B2 · D #22B8D9</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--success);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Success</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #0F9D76 · D #34D399</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--warn);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Warning</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #D98A1F · D #F0B23E</div></div></div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:14px; overflow:hidden;"><div style="height:64px; background:var(--danger);"></div><div style="padding:10px 12px;"><div style="font-size:13px; font-weight:600;">Danger</div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:3px;">L #D1495B · D #F76D7F</div></div></div>
+      </div>
+    </section>
+
+    <!-- Typography -->
+    <section style="margin-bottom:52px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 4px;">Typography</h2>
+      <p style="font-size:13.5px; color:var(--mut); margin:0 0 22px;">IBM Plex Sans for UI, IBM Plex Mono for stats &amp; codes. Tabular numerals everywhere numbers matter.</p>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:8px 24px;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:40px; font-weight:600; letter-spacing:-0.03em;">Display</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">40 / 600 / -3%</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:30px; font-weight:600; letter-spacing:-0.02em;">Heading 1</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">30 / 600</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:22px; font-weight:600;">Heading 2</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">22 / 600</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:18px; font-weight:600;">Heading 3</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">18 / 600</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:15px; font-weight:400;">Body — the quick brown fox jumps</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">15 / 400</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:13px; font-weight:400; color:var(--mut);">Small / secondary text</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">13 / 400</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid var(--bd);"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.12em; color:var(--mut);">Caption / Label</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">11 / 600 / caps</span></div>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:16px 0;"><span style="font-family:'IBM Plex Mono',monospace; font-size:34px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">Mono · tabular</span></div>
+      </div>
+    </section>
+
+    <!-- Spacing / Radius / Elevation -->
+    <section style="margin-bottom:56px; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px;">
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:20px;">
+        <h3 style="font-size:14px; font-weight:600; margin:0 0 16px;">Spacing · 4px base</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:4px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">4 · xs</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:8px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">8 · sm</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:12px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">12 · md</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:16px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">16 · lg</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:24px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">24 · xl</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:32px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">32 · 2xl</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><div style="width:48px; height:14px; background:var(--acc); border-radius:2px;"></div><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--mut);">48 · 3xl</span></div>
+        </div>
+      </div>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:20px;">
+        <h3 style="font-size:14px; font-weight:600; margin:0 0 16px;">Radius</h3>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <div style="text-align:center;"><div style="width:52px; height:44px; background:var(--soft); border:1px solid var(--acc); border-radius:8px;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:6px;">8 sm</div></div>
+          <div style="text-align:center;"><div style="width:52px; height:44px; background:var(--soft); border:1px solid var(--acc); border-radius:12px;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:6px;">12 md</div></div>
+          <div style="text-align:center;"><div style="width:52px; height:44px; background:var(--soft); border:1px solid var(--acc); border-radius:16px;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:6px;">16 lg</div></div>
+          <div style="text-align:center;"><div style="width:52px; height:44px; background:var(--soft); border:1px solid var(--acc); border-radius:22px;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:6px;">22 xl</div></div>
+          <div style="text-align:center;"><div style="width:52px; height:44px; background:var(--soft); border:1px solid var(--acc); border-radius:999px;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:6px;">pill</div></div>
+        </div>
+      </div>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:20px;">
+        <h3 style="font-size:14px; font-weight:600; margin:0 0 16px;">Elevation</h3>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="text-align:center;"><div style="width:60px; height:48px; background:var(--bg); border:1px solid var(--bd); border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,0.18);"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:8px;">e1</div></div>
+          <div style="text-align:center;"><div style="width:60px; height:48px; background:var(--bg); border:1px solid var(--bd); border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.24);"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:8px;">e2</div></div>
+          <div style="text-align:center;"><div style="width:60px; height:48px; background:var(--bg); border:1px solid var(--bd); border-radius:12px; box-shadow:0 16px 36px rgba(0,0,0,0.34);"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--mut); margin-top:8px;">e3</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== COMPONENTS ========== -->
+    <div style="font-size:12px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--acc); margin-bottom:22px;">02 · Components</div>
+
+    <!-- Buttons -->
+    <section style="margin-bottom:48px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 18px;">Buttons</h2>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+          <button style="background:linear-gradient(120deg,var(--acc),var(--acc2)); color:var(--onacc); border:none; border-radius:10px; padding:10px 20px; font-weight:600; font-size:14px; cursor:pointer;" style-hover="filter:brightness(1.08);">Primary</button>
+          <button style="background:var(--surf2); color:var(--tx); border:1px solid var(--bd); border-radius:10px; padding:10px 20px; font-weight:600; font-size:14px; cursor:pointer;" style-hover="border-color:var(--acc);">Secondary</button>
+          <button style="background:transparent; color:var(--acc); border:none; border-radius:10px; padding:10px 16px; font-weight:600; font-size:14px; cursor:pointer;" style-hover="background:var(--soft);">Ghost</button>
+          <button style="background:transparent; color:var(--danger); border:1px solid var(--danger); border-radius:10px; padding:10px 20px; font-weight:600; font-size:14px; cursor:pointer;" style-hover="background:var(--danger); color:var(--onacc);">Danger</button>
+          <button disabled style="background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:10px; padding:10px 20px; font-weight:600; font-size:14px; opacity:0.55; cursor:not-allowed;">Disabled</button>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+          <button style="background:var(--acc); color:var(--onacc); border:none; border-radius:8px; padding:6px 14px; font-weight:600; font-size:12px; cursor:pointer;">Small</button>
+          <button style="background:var(--acc); color:var(--onacc); border:none; border-radius:10px; padding:10px 20px; font-weight:600; font-size:14px; cursor:pointer;">Medium</button>
+          <button style="background:var(--acc); color:var(--onacc); border:none; border-radius:12px; padding:14px 28px; font-weight:600; font-size:16px; cursor:pointer;">Large</button>
+          <button aria-label="add" style="background:var(--acc); color:var(--onacc); border:none; border-radius:10px; width:40px; height:40px; font-weight:600; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;">+</button>
+        </div>
+        <button style="width:100%; background:linear-gradient(120deg,var(--acc),var(--acc2)); color:var(--onacc); border:none; border-radius:12px; padding:14px; font-weight:600; font-size:15px; cursor:pointer;">Full-width primary — Log workout</button>
+      </div>
+    </section>
+
+    <!-- Forms -->
+    <section style="margin-bottom:48px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 18px;">Inputs &amp; controls</h2>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:24px; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px;">
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Text field</label>
+          <input placeholder="e.g. Grilled chicken" style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--bd); border-radius:10px; padding:10px 12px; color:var(--tx); font-size:14px;" style-focus="border-color:var(--acc); outline:none; box-shadow:0 0 0 3px var(--soft);" />
+          <div style="font-size:11.5px; color:var(--mut); margin-top:6px;">Helper text goes here.</div>
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">With unit</label>
+          <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--bd); border-radius:10px; padding:0 12px;">
+            <input type="number" value="180" style="flex:1; width:100%; background:transparent; border:none; padding:10px 0; color:var(--tx); font-size:14px; outline:none; font-variant-numeric:tabular-nums;" />
+            <span style="font-size:13px; color:var(--mut);">g</span>
+          </div>
+          <div style="font-size:11.5px; color:var(--mut); margin-top:6px;">Portion in grams.</div>
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Error state</label>
+          <input value="-40" style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--danger); border-radius:10px; padding:10px 12px; color:var(--tx); font-size:14px; box-shadow:0 0 0 3px color-mix(in srgb,var(--danger) 18%,transparent);" />
+          <div style="font-size:11.5px; color:var(--danger); margin-top:6px;">Must be a positive number.</div>
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Select</label>
+          <select style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--bd); border-radius:10px; padding:10px 12px; color:var(--tx); font-size:14px;">
+            <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Search</label>
+          <div style="display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--bd); border-radius:10px; padding:10px 12px;">
+            <span style="color:var(--mut); font-size:15px;">⌕</span>
+            <input placeholder="Search foods, workouts…" style="flex:1; background:transparent; border:none; color:var(--tx); font-size:14px; outline:none;" />
+          </div>
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:10px;">Toggle</label>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:44px; height:26px; border-radius:999px; background:var(--acc); position:relative;"><div style="position:absolute; top:3px; left:21px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div></div>
+            <div style="width:44px; height:26px; border-radius:999px; background:var(--track); position:relative; border:1px solid var(--bd);"><div style="position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:var(--mut);"></div></div>
+          </div>
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:10px;">Checkbox &amp; slider</label>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;"><input type="checkbox" checked style="width:16px; height:16px;" /><span style="font-size:13px;">Repeat weekly</span></div>
+          <input type="range" min="0" max="100" value="62" style="width:100%;" />
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="display:block; font-size:12px; font-weight:600; margin-bottom:8px;">Segmented control</label>
+          <div style="display:inline-flex; background:var(--bg); border:1px solid var(--bd); border-radius:11px; padding:4px; gap:4px;">
+            <span style="padding:7px 18px; border-radius:8px; font-size:13px; font-weight:600; background:var(--surf); color:var(--tx); box-shadow:0 1px 2px rgba(0,0,0,0.15);">Day</span>
+            <span style="padding:7px 18px; border-radius:8px; font-size:13px; font-weight:600; color:var(--mut);">Week</span>
+            <span style="padding:7px 18px; border-radius:8px; font-size:13px; font-weight:600; color:var(--mut);">Month</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Badges -->
+    <section style="margin-bottom:48px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 18px;">Badges &amp; pills</h2>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:18px;">
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--mut); margin-bottom:10px;">Activity type</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:0.05em; background:var(--soft); color:var(--acc); border-radius:999px; padding:4px 12px;">RUN</span>
+            <span style="font-size:11px; font-weight:700; letter-spacing:0.05em; background:color-mix(in srgb,var(--warn) 16%,transparent); color:var(--warn); border-radius:999px; padding:4px 12px;">LIFT</span>
+            <span style="font-size:11px; font-weight:700; letter-spacing:0.05em; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;">MEDICATION</span>
+            <span style="font-size:11px; font-weight:700; letter-spacing:0.05em; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;">SUPPLEMENT</span>
+            <span style="font-size:11px; font-weight:700; letter-spacing:0.05em; background:color-mix(in srgb,var(--acc2) 16%,transparent); color:var(--acc2); border-radius:999px; padding:4px 12px;">PB</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--mut); margin-bottom:10px;">Status</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:color-mix(in srgb,var(--success) 16%,transparent); color:var(--success); border-radius:999px; padding:4px 12px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--success);"></span>Completed</span>
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--mut);"></span>Skipped</span>
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:var(--soft); color:var(--acc); border-radius:999px; padding:4px 12px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--acc);"></span>Planned</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--mut); margin-bottom:10px;">Source</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:12px; font-weight:500; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;">via Strava</span>
+            <span style="font-size:12px; font-weight:500; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;">via Hevy</span>
+            <span style="font-size:12px; font-weight:500; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;">via HealthKit</span>
+            <span style="font-size:12px; font-weight:500; background:var(--surf2); color:var(--mut); border:1px solid var(--bd); border-radius:999px; padding:4px 12px;">Manual</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <section style="margin-bottom:48px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 18px;">Cards</h2>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px;">
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:18px;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--mut); margin-bottom:6px;">Base card</div>
+          <div style="font-size:15px; line-height:1.5;">Container for grouped content — surface, 1px border, 16px radius.</div>
+        </div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:18px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between;"><span style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--mut);">Weekly volume</span><span style="font-size:11px; color:var(--success); font-weight:600;">▲ 12%</span></div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:32px; font-weight:600; letter-spacing:-0.02em; margin-top:6px; font-variant-numeric:tabular-nums;">42.5<span style="font-size:15px; color:var(--mut); font-weight:400;"> km</span></div>
+          <div style="display:flex; gap:4px; margin-top:14px; align-items:flex-end; height:38px;">
+            <div style="flex:1; height:40%; background:var(--track); border-radius:3px;"></div>
+            <div style="flex:1; height:65%; background:var(--track); border-radius:3px;"></div>
+            <div style="flex:1; height:50%; background:var(--track); border-radius:3px;"></div>
+            <div style="flex:1; height:85%; background:linear-gradient(var(--acc2),var(--acc)); border-radius:3px;"></div>
+            <div style="flex:1; height:70%; background:var(--track); border-radius:3px;"></div>
+            <div style="flex:1; height:100%; background:linear-gradient(var(--acc2),var(--acc)); border-radius:3px;"></div>
+            <div style="flex:1; height:30%; background:var(--track); border-radius:3px;"></div>
+          </div>
+        </div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:16px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <span style="font-size:10px; font-weight:700; letter-spacing:0.05em; background:var(--soft); color:var(--acc); border-radius:999px; padding:3px 9px;">RUN</span>
+            <span style="font-size:12px; color:var(--mut);">7:00 AM · 48 min</span>
+          </div>
+          <div style="font-size:15px; font-weight:600; margin-bottom:2px;">Easy 8 km</div>
+          <div style="font-size:12.5px; color:var(--mut); margin-bottom:14px;">Zone 2 endurance · via Strava</div>
+          <div style="display:flex; gap:8px;">
+            <button style="flex:1; background:var(--acc); color:var(--onacc); border:none; border-radius:9px; padding:8px; font-weight:600; font-size:13px; cursor:pointer;">Tick</button>
+            <button style="flex:1; background:var(--surf2); color:var(--tx); border:1px solid var(--bd); border-radius:9px; padding:8px; font-weight:600; font-size:13px; cursor:pointer;">Skip</button>
+          </div>
+        </div>
+        <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px;">
+          <div style="width:40px; height:40px; border-radius:11px; background:color-mix(in srgb,#fc4c02 22%,var(--surf)); display:flex; align-items:center; justify-content:center; font-weight:700; color:#fc6a30; font-size:16px;">S</div>
+          <div style="flex:1;"><div style="font-size:14px; font-weight:600;">Strava</div><div style="font-size:12px; color:var(--success);">Connected</div></div>
+          <button style="background:var(--surf2); color:var(--tx); border:1px solid var(--bd); border-radius:9px; padding:7px 14px; font-weight:600; font-size:12.5px; cursor:pointer;">Manage</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data viz -->
+    <section style="margin-bottom:20px;">
+      <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 18px;">Data visualization</h2>
+      <div style="background:var(--surf); border:1px solid var(--bd); border-radius:16px; padding:24px; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:28px; align-items:center;">
+        <div style="display:flex; justify-content:center;">
+          <div style="position:relative; width:150px; height:150px; border-radius:50%; background:conic-gradient(from 180deg, var(--acc2), var(--acc) 62%, var(--track) 0); box-shadow:0 0 30px var(--soft);">
+            <div style="position:absolute; inset:13px; border-radius:50%; background:var(--surf); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+              <span style="font-family:'IBM Plex Mono',monospace; font-size:34px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1,480</span>
+              <span style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mut);">kcal left</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;"><span style="font-weight:600;">Protein</span><span style="color:var(--mut); font-variant-numeric:tabular-nums;">120 / 165 g</span></div>
+            <div style="height:8px; border-radius:999px; background:var(--track);"><div style="width:73%; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--acc),var(--acc2));"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;"><span style="font-weight:600;">Carbs</span><span style="color:var(--mut); font-variant-numeric:tabular-nums;">210 / 260 g</span></div>
+            <div style="height:8px; border-radius:999px; background:var(--track);"><div style="width:81%; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--acc),var(--acc2));"></div></div>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;"><span style="font-weight:600;">Fat</span><span style="color:var(--mut); font-variant-numeric:tabular-nums;">58 / 70 g</span></div>
+            <div style="height:8px; border-radius:999px; background:var(--track);"><div style="width:83%; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--acc),var(--acc2));"></div></div>
+          </div>
+          <div style="margin-top:6px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--mut); margin-bottom:8px;">Streak · 5 days</div>
+            <div style="display:flex; gap:6px;">
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--acc);"></div>
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--acc);"></div>
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--acc);"></div>
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--acc);"></div>
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--acc);"></div>
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--track);"></div>
+              <div style="width:22px; height:22px; border-radius:7px; background:var(--track);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:760},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'light' | 'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#22b8d9&quot;,&quot;options&quot;:[&quot;#22b8d9&quot;,&quot;#0891b2&quot;,&quot;#2f6bff&quot;,&quot;#14c99a&quot;,&quot;#7c6cff&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { theme: this.props.defaultTheme || 'dark' }
+
+  themeSets() {
+    const acc = this.props.accentColor
+    const light = { '--bg':'#f4f6f8','--surf':'#ffffff','--surf2':'#eef2f6','--bd':'#e0e6ec','--tx':'#0c1826','--mut':'#5b6b7b','--acc':'#0891b2','--acc2':'#06b6d4','--track':'#e0e6ec','--onacc':'#ffffff','--soft':'rgba(8,145,178,0.10)','--success':'#0f9d76','--warn':'#d98a1f','--danger':'#d1495b' }
+    const dark = { '--bg':'#08111a','--surf':'#101d29','--surf2':'#16283a','--bd':'#1c2f3d','--tx':'#eaf2f8','--mut':'#7d94a6','--acc':'#22b8d9','--acc2':'#38e0e0','--track':'#1c2f3d','--onacc':'#04141a','--soft':'rgba(34,184,217,0.16)','--success':'#34d399','--warn':'#f0b23e','--danger':'#f76d7f' }
+    if (acc) { light['--acc'] = acc; dark['--acc'] = acc }
+    return { light, dark }
+  }
+
+  renderVals() {
+    const isDark = this.state.theme === 'dark'
+    const segBase = { padding:'6px 18px', borderRadius:'8px', border:'none', fontSize:'13px', fontWeight:600, cursor:'pointer', letterSpacing:'0.02em' }
+    const active = { ...segBase, background:'var(--surf)', color:'var(--tx)', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' }
+    const idle = { ...segBase, background:'transparent', color:'var(--mut)' }
+    return {
+      themeVars: this.themeSets()[this.state.theme],
+      isDark,
+      segLightStyle: isDark ? idle : active,
+      segDarkStyle: isDark ? active : idle,
+      setLight: () => this.setState({ theme: 'light' }),
+      setDark: () => this.setState({ theme: 'dark' }),
+    }
+  }
+}
+</script>
+</body>
+</html>

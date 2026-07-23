@@ -55,7 +55,7 @@ export const Empty = () => (
 export const Failure = ({
   error,
 }: CellFailureProps<ScheduledItemsForWeekQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -91,7 +91,9 @@ function ItemRow({ item }: ItemRowProps) {
   return (
     <li className="tf-week-item">
       <div className="tf-week-item-main">
-        <span className="tf-item-type">{item.type}</span>
+        <span className={`tf-item-type tf-item-type--${item.type.toLowerCase()}`}>
+          {item.type}
+        </span>
         <span className="tf-item-title">{item.title}</span>
         {item.block && <span className="tf-item-block">{item.block.name}</span>}
         <span

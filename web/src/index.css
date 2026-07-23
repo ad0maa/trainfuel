@@ -1,13 +1,111 @@
+/* TrainFuel — Cyan Steel design system.
+ * Tokens sourced from docs/design-system/tokens/tokens.css — keep in sync if
+ * the palette or scale changes there. Dark mode: opt-in via
+ * <html data-theme="dark"> (or "light" to force), otherwise follows the OS.
+ */
+
 :root {
-  --tf-bg: #f7f7f5;
+  color-scheme: light;
+
+  /* color — light */
+  --tf-bg: #f4f6f8;
   --tf-surface: #ffffff;
-  --tf-border: #e2e2df;
-  --tf-text: #1f1f1d;
-  --tf-text-muted: #6b6b66;
-  --tf-accent: #2f6f4f;
-  --tf-accent-soft: #e4f0e9;
-  --tf-danger: #b3441f;
-  --tf-radius: 10px;
+  --tf-surface-2: #eef2f6;
+  --tf-border: #e0e6ec;
+  --tf-text: #0c1826;
+  --tf-text-muted: #5b6b7b;
+  --tf-accent: #0891b2;
+  --tf-accent-2: #06b6d4;
+  --tf-accent-soft: rgba(8, 145, 178, 0.1);
+  --tf-on-accent: #ffffff;
+  --tf-track: #e0e6ec;
+  --tf-success: #0f9d76;
+  --tf-success-soft: rgba(15, 157, 118, 0.14);
+  --tf-warning: #d98a1f;
+  --tf-warning-soft: rgba(217, 138, 31, 0.16);
+  --tf-danger: #d1495b;
+  --tf-danger-soft: rgba(209, 73, 91, 0.14);
+  --tf-accent-2-soft: rgba(6, 182, 212, 0.14);
+
+  /* radius */
+  --tf-radius-sm: 8px;
+  --tf-radius-md: 12px;
+  --tf-radius-lg: 16px;
+  --tf-radius-xl: 22px;
+  --tf-radius-pill: 999px;
+  --tf-radius: 12px; /* legacy alias */
+
+  /* spacing (4px base) */
+  --tf-space-xs: 4px;
+  --tf-space-sm: 8px;
+  --tf-space-md: 12px;
+  --tf-space-lg: 16px;
+  --tf-space-xl: 24px;
+  --tf-space-2xl: 32px;
+  --tf-space-3xl: 48px;
+
+  /* typography */
+  --tf-font-sans:
+    'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tf-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* elevation — border-first system; shadows are for overlays, used sparingly */
+  --tf-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --tf-shadow-2: 0 6px 16px rgba(0, 0, 0, 0.24);
+  --tf-shadow-3: 0 16px 36px rgba(0, 0, 0, 0.34);
+
+  /* gradient used on rings, bars, primary buttons */
+  --tf-accent-gradient: linear-gradient(
+    120deg,
+    var(--tf-accent),
+    var(--tf-accent-2)
+  );
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --tf-bg: #08111a;
+  --tf-surface: #101d29;
+  --tf-surface-2: #16283a;
+  --tf-border: #1c2f3d;
+  --tf-text: #eaf2f8;
+  --tf-text-muted: #7d94a6;
+  --tf-accent: #22b8d9;
+  --tf-accent-2: #38e0e0;
+  --tf-accent-soft: rgba(34, 184, 217, 0.16);
+  --tf-on-accent: #04141a;
+  --tf-track: #1c2f3d;
+  --tf-success: #34d399;
+  --tf-success-soft: rgba(52, 211, 153, 0.18);
+  --tf-warning: #f0b23e;
+  --tf-warning-soft: rgba(240, 178, 62, 0.18);
+  --tf-danger: #f76d7f;
+  --tf-danger-soft: rgba(247, 109, 127, 0.18);
+  --tf-accent-2-soft: rgba(56, 224, 224, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --tf-bg: #08111a;
+    --tf-surface: #101d29;
+    --tf-surface-2: #16283a;
+    --tf-border: #1c2f3d;
+    --tf-text: #eaf2f8;
+    --tf-text-muted: #7d94a6;
+    --tf-accent: #22b8d9;
+    --tf-accent-2: #38e0e0;
+    --tf-accent-soft: rgba(34, 184, 217, 0.16);
+    --tf-on-accent: #04141a;
+    --tf-track: #1c2f3d;
+    --tf-success: #34d399;
+    --tf-success-soft: rgba(52, 211, 153, 0.18);
+    --tf-warning: #f0b23e;
+    --tf-warning-soft: rgba(240, 178, 62, 0.18);
+    --tf-danger: #f76d7f;
+    --tf-danger-soft: rgba(247, 109, 127, 0.18);
+    --tf-accent-2-soft: rgba(56, 224, 224, 0.18);
+  }
 }
 
 * {
@@ -18,9 +116,37 @@ body {
   margin: 0;
   background: var(--tf-bg);
   color: var(--tf-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
-  line-height: 1.5;
+  font-family: var(--tf-font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--tf-font-sans);
+  font-weight: 600;
+  color: var(--tf-text);
+}
+
+h1 {
+  font-size: 1.875rem; /* 30px */
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.375rem; /* 22px */
+}
+
+h3 {
+  font-size: 1.125rem; /* 18px */
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .tf-page {
@@ -37,7 +163,6 @@ body {
 }
 
 .tf-page-header h1 {
-  font-size: 1.75rem;
   margin: 0;
 }
 
@@ -62,15 +187,31 @@ body {
   padding: 1rem 0;
 }
 
-.tf-energy-summary {
+.tf-cell-error {
+  color: var(--tf-danger);
+  padding: var(--tf-space-md) 0;
+}
+
+/* ---- Cards ------------------------------------------------------------ */
+
+.tf-energy-summary,
+.tf-item,
+.tf-block,
+.tf-week-day,
+.tf-food-entry,
+.tf-integration-card,
+.tf-unmatched-activity {
   background: var(--tf-surface);
   border: 1px solid var(--tf-border);
-  border-radius: var(--tf-radius);
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  border-radius: var(--tf-radius-lg);
+}
+
+.tf-energy-summary {
+  padding: var(--tf-space-xl);
+  margin-bottom: var(--tf-space-lg);
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--tf-space-xl);
   flex-wrap: wrap;
 }
 
@@ -79,22 +220,66 @@ body {
   display: block;
 }
 
+.tf-integration-card {
+  padding: var(--tf-space-lg);
+  margin-bottom: var(--tf-space-md);
+}
+
+.tf-integration-error {
+  color: var(--tf-danger);
+  font-size: 0.8125rem;
+  margin: 0.35rem 0 0;
+}
+
+.tf-integration-synced {
+  color: var(--tf-text-muted);
+  font-size: 0.8125rem;
+  margin: 0.35rem 0 0;
+}
+
+.tf-hevy-connect-form {
+  display: flex;
+  gap: var(--tf-space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: var(--tf-space-sm);
+}
+
+.tf-hevy-connect-form input {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ---- Calorie ring (hero stat) ------------------------------------------ */
+
 .tf-energy-ring {
   --tf-ring-pct: 0%;
   position: relative;
-  width: 96px;
-  height: 96px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   flex-shrink: 0;
   background: conic-gradient(
+    from 0deg,
+    var(--tf-accent-2),
     var(--tf-accent) var(--tf-ring-pct),
-    var(--tf-accent-soft) var(--tf-ring-pct)
+    var(--tf-track) var(--tf-ring-pct)
   );
+}
+
+:root[data-theme='dark'] .tf-energy-ring {
+  box-shadow: 0 0 30px var(--tf-accent-soft);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .tf-energy-ring {
+    box-shadow: 0 0 30px var(--tf-accent-soft);
+  }
 }
 
 .tf-energy-ring-fill {
   position: absolute;
-  inset: 8px;
+  inset: 9px;
   background: var(--tf-surface);
   border-radius: 50%;
 }
@@ -110,21 +295,24 @@ body {
 }
 
 .tf-energy-ring-value {
-  font-size: 1.1rem;
+  font-family: var(--tf-font-mono);
+  font-size: 1.375rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--tf-text);
 }
 
 .tf-energy-ring-label {
-  font-size: 0.65rem;
+  font-size: 0.625rem;
+  font-weight: 600;
   color: var(--tf-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.08em;
 }
 
 .tf-macro-list {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--tf-space-xl);
   flex-wrap: wrap;
   margin: 0;
 }
@@ -132,19 +320,23 @@ body {
 .tf-macro-list div {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
 .tf-macro-list dt {
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
   color: var(--tf-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.08em;
 }
 
 .tf-macro-list dd {
   margin: 0;
+  font-family: var(--tf-font-mono);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
 }
 
 .tf-energy-note {
@@ -154,27 +346,28 @@ body {
   font-size: 0.85rem;
 }
 
+/* ---- Scheduled item / block / week lists ------------------------------- */
+
 .tf-item-list,
 .tf-block-list {
-  list-style: none;
   margin: 0 0 1rem;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--tf-space-md);
 }
 
 .tf-item,
 .tf-block,
 .tf-week-day {
-  background: var(--tf-surface);
-  border: 1px solid var(--tf-border);
-  border-radius: var(--tf-radius);
-  padding: 1rem;
+  padding: var(--tf-space-lg);
 }
 
 .tf-item--completed {
   opacity: 0.7;
+}
+
+.tf-item--skipped {
+  opacity: 0.6;
 }
 
 .tf-item-main {
@@ -184,22 +377,11 @@ body {
   flex-wrap: wrap;
 }
 
-.tf-item-type,
-.tf-phase-badge,
-.tf-status-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  background: var(--tf-accent-soft);
-  color: var(--tf-accent);
-  border-radius: 999px;
-  padding: 0.15rem 0.55rem;
-}
-
 .tf-item-time {
   color: var(--tf-text-muted);
+  font-family: var(--tf-font-mono);
   font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
 }
 
 .tf-item-title {
@@ -209,6 +391,7 @@ body {
 .tf-source-badge {
   margin-left: auto;
   font-size: 0.75rem;
+  font-weight: 500;
   color: var(--tf-text-muted);
 }
 
@@ -222,26 +405,8 @@ body {
 .tf-week-item-actions,
 .tf-form-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-button {
-  font: inherit;
-  border: 1px solid var(--tf-border);
-  background: var(--tf-surface);
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-  border-color: var(--tf-accent);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  gap: var(--tf-space-sm);
+  margin-top: var(--tf-space-md);
 }
 
 .tf-block-header {
@@ -260,47 +425,50 @@ button:disabled {
   margin: 0.25rem 0;
 }
 
+.tf-block-notes {
+  color: var(--tf-text-muted);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0;
+}
+
 .tf-plan-section {
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--tf-space-3xl);
 }
 
 .tf-week-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--tf-space-lg);
+  margin-bottom: var(--tf-space-lg);
 }
 
 .tf-week-view {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--tf-space-md);
 }
 
 .tf-week-day h3 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--tf-space-sm);
   font-size: 0.9rem;
   color: var(--tf-text-muted);
 }
 
 .tf-week-day ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--tf-space-sm);
 }
 
 .tf-week-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--tf-space-lg);
   flex-wrap: wrap;
   border-top: 1px solid var(--tf-border);
-  padding-top: 0.5rem;
+  padding-top: var(--tf-space-sm);
 }
 
 .tf-week-item:first-child {
@@ -311,7 +479,7 @@ button:disabled {
 .tf-week-item-main {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--tf-space-sm);
   flex-wrap: wrap;
 }
 
@@ -320,65 +488,293 @@ button:disabled {
   font-size: 0.85rem;
 }
 
+/* ---- Unmatched activities ----------------------------------------------- */
+
+.tf-unmatched-activities {
+  margin-top: var(--tf-space-2xl);
+}
+
+.tf-unmatched-activities ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tf-space-sm);
+  margin-top: var(--tf-space-sm);
+}
+
+.tf-unmatched-activity {
+  padding: var(--tf-space-md) var(--tf-space-lg);
+}
+
+.tf-unmatched-activity-main {
+  display: flex;
+  align-items: center;
+  gap: var(--tf-space-sm);
+  flex-wrap: wrap;
+}
+
+.tf-unmatched-activity form {
+  display: flex;
+  gap: var(--tf-space-sm);
+  margin-top: var(--tf-space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ---- Badges & pills ------------------------------------------------------ */
+
+.tf-item-type,
+.tf-phase-badge,
+.tf-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  border-radius: var(--tf-radius-pill);
+  padding: 0.2rem 0.6rem;
+  background: var(--tf-surface-2);
+  color: var(--tf-text-muted);
+  border: 1px solid var(--tf-border);
+}
+
+.tf-item-type--run {
+  background: var(--tf-accent-soft);
+  color: var(--tf-accent);
+  border-color: transparent;
+}
+
+.tf-item-type--lift {
+  background: var(--tf-warning-soft);
+  color: var(--tf-warning);
+  border-color: transparent;
+}
+
+.tf-item-type--pb {
+  background: var(--tf-accent-2-soft);
+  color: var(--tf-accent-2);
+  border-color: transparent;
+}
+
+.tf-status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tf-status--completed {
+  background: var(--tf-success-soft);
+  color: var(--tf-success);
+  border-color: transparent;
+}
+
+.tf-status--planned {
+  background: var(--tf-accent-soft);
+  color: var(--tf-accent);
+  border-color: transparent;
+}
+
+.tf-status--skipped {
+  background: var(--tf-surface-2);
+  color: var(--tf-text-muted);
+}
+
+.tf-status--error {
+  background: var(--tf-danger-soft);
+  color: var(--tf-danger);
+  border-color: transparent;
+}
+
+/* ---- Buttons -------------------------------------------------------------- */
+
+button {
+  font: 600 0.875rem/1 var(--tf-font-sans);
+  color: var(--tf-text);
+  background: var(--tf-surface-2);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-md);
+  padding: 0.625rem 1.25rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    filter 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--tf-accent);
+}
+
+button:focus-visible {
+  outline: none;
+  border-color: var(--tf-accent);
+  box-shadow: 0 0 0 3px var(--tf-accent-soft);
+}
+
+button:disabled {
+  background: var(--tf-surface-2);
+  color: var(--tf-text-muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tf-button {
+  background: var(--tf-accent-gradient);
+  border-color: transparent;
+  color: var(--tf-on-accent);
+}
+
+.tf-button:hover:not(:disabled) {
+  border-color: transparent;
+  filter: brightness(1.08);
+}
+
+.tf-button:disabled {
+  background: var(--tf-surface-2);
+  color: var(--tf-text-muted);
+}
+
+.tf-button--secondary {
+  background: var(--tf-surface-2);
+  border-color: var(--tf-border);
+  color: var(--tf-text);
+}
+
+.tf-button--secondary:hover:not(:disabled) {
+  border-color: var(--tf-accent);
+  filter: none;
+}
+
+.tf-button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--tf-accent);
+}
+
+.tf-button--ghost:hover:not(:disabled) {
+  background: var(--tf-accent-soft);
+  border-color: transparent;
+}
+
+.tf-button--danger {
+  background: transparent;
+  border-color: var(--tf-danger);
+  color: var(--tf-danger);
+}
+
+.tf-button--danger:hover:not(:disabled) {
+  background: var(--tf-danger);
+  color: var(--tf-on-accent);
+}
+
+.tf-button--sm {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+.tf-button--lg {
+  padding: 0.9rem 1.75rem;
+  font-size: 1rem;
+}
+
+/* ---- Inputs & forms -------------------------------------------------------- */
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--tf-text);
+  background: var(--tf-bg);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius-md);
+  padding: 0.625rem 0.75rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--tf-text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--tf-accent);
+  box-shadow: 0 0 0 3px var(--tf-accent-soft);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .tf-form {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  margin-top: 0.75rem;
+  margin-top: var(--tf-space-md);
   max-width: 420px;
 }
 
 .tf-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-top: 0.5rem;
+  margin-top: var(--tf-space-sm);
+  color: var(--tf-text);
 }
 
 .tf-input {
-  border: 1px solid var(--tf-border);
-  border-radius: 6px;
-  padding: 0.45rem 0.6rem;
-  font: inherit;
+  width: 100%;
+}
+
+.tf-form-hint {
+  color: var(--tf-text-muted);
+  font-size: 0.8125rem;
+  margin: 0.15rem 0 0.35rem;
 }
 
 .tf-field-error {
   color: var(--tf-danger);
-  font-size: 0.8rem;
+  font-size: 0.71875rem;
+  margin: 0;
 }
 
-.tf-button--secondary {
-  background: transparent;
+.tf-profile-section {
+  max-width: 420px;
 }
 
 .tf-date-nav {
-  margin-bottom: 1rem;
+  margin-bottom: var(--tf-space-lg);
 }
 
+/* ---- Food log -------------------------------------------------------------- */
+
 .tf-meal-section {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--tf-space-xl);
 }
 
 .tf-meal-section h3 {
-  font-size: 1rem;
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--tf-space-sm);
 }
 
 .tf-food-entry-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--tf-space-sm);
 }
 
 .tf-food-entry {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: var(--tf-surface);
-  border: 1px solid var(--tf-border);
-  border-radius: var(--tf-radius);
+  gap: var(--tf-space-md);
   padding: 0.6rem 0.85rem;
 }
 
@@ -390,29 +786,26 @@ button:disabled {
 .tf-food-entry-qty,
 .tf-food-entry-kcal {
   color: var(--tf-text-muted);
+  font-family: var(--tf-font-mono);
   font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
   white-space: nowrap;
+}
+
+.tf-unit-label {
+  color: var(--tf-text-muted);
+  font-size: 0.875rem;
 }
 
 .tf-food-search {
   max-width: 480px;
 }
 
-.tf-food-search input[type='search'] {
-  width: 100%;
-  border: 1px solid var(--tf-border);
-  border-radius: 6px;
-  padding: 0.5rem 0.7rem;
-  font: inherit;
-}
-
 .tf-food-search-results {
-  list-style: none;
-  margin: 0.5rem 0 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--tf-space-xs);
+  margin-top: var(--tf-space-sm);
   max-height: 260px;
   overflow-y: auto;
 }
@@ -420,11 +813,14 @@ button:disabled {
 .tf-food-search-results button {
   width: 100%;
   text-align: left;
-  background: var(--tf-surface);
-  border: 1px solid var(--tf-border);
-  border-radius: 6px;
-  padding: 0.5rem 0.7rem;
-  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  font-weight: 400;
+}
+
+.tf-food-search-results button:hover:not(:disabled) {
+  background: var(--tf-surface-2);
+  border-color: transparent;
 }
 
 .tf-unverified-hint {
@@ -435,7 +831,119 @@ button:disabled {
 .tf-log-entry-form {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--tf-space-sm);
   flex-wrap: wrap;
-  margin-top: 0.5rem;
+  margin-top: var(--tf-space-sm);
+}
+
+/* ---- Auth pages (CedarJS scaffold retheme) --------------------------------
+ * Login/Signup/Forgot/Reset use the generated .rw-* scaffold (scaffold.css),
+ * not the .tf-* system. Rather than rewrite those pages, retint the scaffold
+ * classes they actually use with our tokens so they don't look like a
+ * different app. scaffold.css must be imported before this file (see
+ * App.tsx) for these overrides to win.
+ */
+
+.rw-scaffold,
+.rw-toast {
+  background-color: var(--tf-bg);
+  color: var(--tf-text);
+  font-family: var(--tf-font-sans);
+}
+
+.rw-segment {
+  border-color: var(--tf-border);
+  border-radius: var(--tf-radius-lg);
+}
+
+.rw-segment-header {
+  background-color: var(--tf-surface-2);
+  color: var(--tf-text);
+  border-bottom: 1px solid var(--tf-border);
+}
+
+.rw-segment-main {
+  background-color: var(--tf-surface);
+}
+
+.rw-heading .rw-link,
+.rw-heading .rw-link:hover {
+  color: var(--tf-text);
+}
+
+.rw-link,
+.rw-login-link a {
+  color: var(--tf-accent);
+}
+
+.rw-link:hover {
+  color: var(--tf-accent-2);
+}
+
+.rw-forgot-link {
+  color: var(--tf-text-muted);
+}
+
+.rw-forgot-link:hover {
+  color: var(--tf-accent);
+}
+
+.rw-login-link {
+  color: var(--tf-text-muted);
+}
+
+.rw-cell-error,
+.rw-form-error-wrapper {
+  background-color: var(--tf-danger-soft);
+  color: var(--tf-danger);
+  border-color: var(--tf-danger);
+  border-radius: var(--tf-radius-sm);
+}
+
+.rw-label {
+  color: var(--tf-text);
+}
+
+.rw-label.rw-label-error {
+  color: var(--tf-danger);
+}
+
+.rw-input {
+  background-color: var(--tf-bg);
+  color: var(--tf-text);
+  border-color: var(--tf-border);
+  border-radius: var(--tf-radius-md);
+}
+
+.rw-input:focus {
+  border-color: var(--tf-accent);
+  box-shadow: 0 0 0 3px var(--tf-accent-soft);
+}
+
+.rw-input-error {
+  border-color: var(--tf-danger);
+  color: var(--tf-danger);
+}
+
+.rw-input-error:focus {
+  border-color: var(--tf-danger);
+  box-shadow: 0 0 0 3px var(--tf-danger-soft);
+}
+
+.rw-field-error {
+  color: var(--tf-danger);
+}
+
+.rw-button {
+  background: var(--tf-accent-gradient);
+  color: var(--tf-on-accent);
+  border-radius: var(--tf-radius-md);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.rw-button:hover {
+  background: var(--tf-accent-gradient);
+  filter: brightness(1.08);
+  color: var(--tf-on-accent);
 }

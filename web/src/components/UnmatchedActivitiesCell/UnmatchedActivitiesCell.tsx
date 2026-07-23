@@ -87,7 +87,7 @@ export const Empty = () => null // nothing unmatched — don't clutter the dashb
 export const Failure = ({
   error,
 }: CellFailureProps<UnmatchedActivitiesQueryVariables>) => (
-  <div style={{ color: 'red' }}>Error: {error?.message}</div>
+  <div className="tf-cell-error">Error: {error?.message}</div>
 )
 
 type Activity = UnmatchedActivitiesQuery['unmatchedExternalActivities'][number]
@@ -144,7 +144,11 @@ function ActivityRow({ activity }: { activity: Activity }) {
   return (
     <li className="tf-unmatched-activity">
       <div className="tf-unmatched-activity-main">
-        <span className="tf-item-type">{activity.activityType}</span>
+        <span
+          className={`tf-item-type tf-item-type--${activity.activityType.toLowerCase()}`}
+        >
+          {activity.activityType}
+        </span>
         <span>{new Date(activity.startedAt).toLocaleString()}</span>
         {distance && <span>{distance}</span>}
         {duration && <span>{duration}</span>}
