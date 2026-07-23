@@ -39,3 +39,25 @@ export async function upsertDailyIntakeRollup(
     update: { ...rollup },
   })
 }
+
+/**
+ * Sets a single user/day's DailyMetric.weightKg — called from
+ * syncHealthSamples (SPEC.md §4.5: "Body mass flows into
+ * DailyMetric.weightKg (latest sample per local day)") after a batch of
+ * HealthKit BODY_MASS samples lands. Only touches weightKg — intake /
+ * exerciseKcalRaw / target fields (owned by other parts of the app) are
+ * preserved on update, same as `upsertDailyIntakeRollup` above.
+ */
+export async function upsertDailyMetricWeight(
+  userId: string,
+  dateStr: string,
+  weightKg: number
+): Promise<void> {
+  const date = localDateToUtcMidnight(dateStr)
+
+  await db.dailyMetric.upsert({
+    where: { userId_date: { userId, date } },
+    create: { userId, date, weightKg },
+    update: { weightKg },
+  })
+}
