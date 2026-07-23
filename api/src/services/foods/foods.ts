@@ -1,6 +1,10 @@
 import type { QueryResolvers, FoodRelationResolvers } from 'types/graphql'
 
 import { db } from 'src/lib/db'
+import {
+  fetchOffProduct,
+  normalizeOffProduct,
+} from 'src/lib/integrations/foodSources/openFoodFacts'
 
 // SPEC.md §4.4: "Search order: local Food table (Postgres pg_trgm
 // ILIKE/similarity + recent/frequent boost) → OFF → USDA... Recent/frequent:
@@ -87,6 +91,46 @@ export const searchFoods: QueryResolvers['searchFoods'] = async ({
 
 export const food: QueryResolvers['food'] = ({ id }) => {
   return db.food.findUnique({ where: { id } })
+}
+
+/**
+ * SPEC.md §4.4/§4.5's OFF barcode flow — local DB first, then a live OFF
+ * lookup on miss, caching the result on a hit (upsert on
+ * `@@unique([source, externalId])`, `externalId` = the barcode itself, per
+ * §4.4). Returns null (not an error) when the barcode isn't found
+ * anywhere, or OFF's product is missing required nutrients — either way
+ * the mobile client's job is to fall back to manual entry, not surface a
+ * GraphQL error for an ordinary "unknown barcode."
+ */
+export const foodByBarcode: QueryResolvers['foodByBarcode'] = async ({
+  barcode,
+}) => {
+  const local = await db.food.findFirst({ where: { barcode } })
+  if (local) return local
+
+  const raw = await fetchOffProduct(barcode)
+  const normalized = normalizeOffProduct(barcode, raw)
+  if (!normalized) return null
+
+  return db.food.upsert({
+    where: { source_externalId: { source: 'OFF', externalId: barcode } },
+    create: {
+      name: normalized.name,
+      brand: normalized.brand,
+      source: 'OFF',
+      externalId: barcode,
+      barcode,
+      per100: normalized.per100,
+      isLiquid: normalized.isLiquid,
+      verified: false,
+    },
+    update: {
+      name: normalized.name,
+      brand: normalized.brand,
+      per100: normalized.per100,
+      isLiquid: normalized.isLiquid,
+    },
+  })
 }
 
 export const Food: FoodRelationResolvers = {
