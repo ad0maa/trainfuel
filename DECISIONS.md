@@ -880,6 +880,41 @@ both fixed same-day.
   silently, permanently disabled with zero explanation (`useQuery`'s `error` was never
   read). Now shows "Strava isn't configured on this deployment yet" instead.
 
+## Mobile bearer auth (foundation for M6)
+
+The Expo mobile app (now its own repo, `trainfuel-mobile` — see below) needs to
+authenticate against this api, but dbAuth's session is an httpOnly cookie, which
+doesn't carry over RN's fetch/Apollo stack the way it does in a browser. SPEC.md §2
+flagged this as a fallback to evaluate; it's now built.
+
+- **`mobileLogin` mutation** (`api/src/services/mobileAuth/`, `@skipAuth` — it *is* the
+  login check) verifies email/password against the exact same `hashedPassword`/`salt`
+  dbAuth's signup already writes, via `@cedarjs/auth-dbauth-api`'s exported
+  `hashPassword` — not a reimplementation of the hashing scheme. Returns a signed
+  bearer token instead of setting a cookie.
+- **`api/src/lib/mobileAuthToken.ts`**: HMAC-SHA256 over `{sub, exp}`, base64url-encoded,
+  using Node's built-in `crypto` — same "no extra dependency" choice `crypto.ts` made for
+  AES-GCM, since the payload only ever needs one claim and an expiry. `MOBILE_AUTH_SECRET`
+  (`.env.example`) is the HMAC key. **Single long-lived token (30 days), no refresh
+  pair** — deferred, not forgotten; the donor's Axios app had real access+refresh
+  rotation, which is real infra (a revocable-token table) not needed for a first working
+  mobile client. Revisit if token theft/expiry ever becomes a live pain point.
+- **Second auth decoder, not a replacement**: `api/src/functions/graphql.ts`'s
+  `createGraphQLHandler` now takes `authDecoder: [dbAuthDecoder, mobileAuthDecoder]`.
+  Cedar's `getAuthenticationContext` picks which decoder to try via a client-sent
+  `auth-provider` header (`dbAuth` from the cookie, `mobile` from the mobile app) — web's
+  existing cookie flow is untouched.
+- **Repo split, not a workspace**: the mobile app was briefly scaffolded as an
+  `apps/mobile` workspace here, then extracted to its own repo
+  ([`trainfuel-mobile`](https://github.com/ad0maa/trainfuel-mobile)) after real breakage
+  surfaced — Expo SDK 57 wants React 19/TypeScript ~6, this repo's CedarJS side is
+  pinned to React 18/TypeScript 5.9, and mixing both in one yarn install graph produced
+  duplicate `@cedarjs/router` instances and ~50 spurious type errors (TypeScript couldn't
+  merge the generated `AvailableRoutes` ambient declaration across the two physical
+  copies). Two repos, two independent dependency trees, no conflict. The mobile repo's
+  codegen introspects a locally-running `yarn cedar dev api` (this api disables
+  introspection in production by default, so it can't point at the deployed URL).
+
 ## Open items carried from SPEC.md §10 (not yet resolved)
 
 1. Real product name — still "TrainFuel" placeholder.
