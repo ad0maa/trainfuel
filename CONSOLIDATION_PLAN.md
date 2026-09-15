@@ -13,6 +13,14 @@ This plan extends SPEC.md's milestone ladder (M0–M7). M0–M1 are committed; M
 complete-but-uncommitted in the working tree. New work slots in as **M2.5** (plan
 generator port) and modifies **M3** (Strava, now a port rather than greenfield).
 
+> **Status update (2026-09-15):** this file previously went stale after M4 — Phase
+> 4+ below listed M5/M6/M7 as a flat "remaining scope" block. Since then, **M7
+> (Polish) and M6 (Mobile) have both shipped**; only **M5 (Google Calendar)**
+> remains unbuilt from SPEC.md's full ladder. See Phases 4–6 below (renumbered from
+> the old "Phase 4+" placeholder) for what actually shipped in each. No commits have
+> landed on `trainfuel-cedar`'s `main` since M7 merged (2026-07-23); `trainfuel-mobile`
+> (separate repo) has one additional merged PR since its own scaffold.
+
 ---
 
 ## Phase 0 — Stabilize what exists ✅ done (2026-07-23)
@@ -198,53 +206,108 @@ mechanism SPEC.md §4.2 anticipated is actually `/v1/workouts/events?since=`, a
 different endpoint). Owner checklist item #5 (Hevy Pro + API key) is still open — the
 integration has never been exercised against a real account.
 
-## Phase 4+ — remaining SPEC milestones (unchanged scope)
+## Phase 4 (M7) — Polish ✅ done (2026-07-23, `trainfuel-cedar` PR #6)
 
-- **M5 Google Calendar** (push/patch/delete, reminder offsets, nightly reconcile).
-- **M6 Mobile** (Expo: Today/tick, barcode → OFF, HealthKit weight/energy, offline
-  queue). The donor's Expo app is a *different* API client (REST/axios) — its screens
-  are reference-only; don't port code, the mobile side consumes GraphQL here.
-- **M7 Polish** (Progress screens, Level 2 macros wired to the plan — the
-  `prescription.isLongRun/isQualityRun` flags from M2.5 make this nearly free — plus
-  the lift progression chart, deferred from M4 since it needs no new backend work,
-  just a GraphQL `exercises` field and a chart component).
+**Shipped:** a persistent sidebar + topbar app shell (`web/src/layouts/MainLayout/`)
+with a light/dark toggle, replacing every page's own header/nav; BMI and TDEE
+calculator tools (TDEE backed by a new `tdeeEstimate` query reusing the existing
+`api/src/lib/energy` module rather than reimplementing Mifflin-St Jeor client-side);
+**Level 2 macro periodization** (SPEC.md §6.3) — new pure `dayType.ts`/
+`level2Macros.ts` modules (fully unit tested) wired into `todayEnergySummary` and
+`DailyEnergySummaryCell`, finally consuming the `prescription.isLongRun/isQualityRun`
+flags M2.5 had been writing since the plan generator, unread, since it was built; and
+the **Progress page** — new `dailyMetrics`/`liftActivities` queries plus a
+`recharts`-based weight-trend chart (raw points + a simple EMA) and lift-progression
+chart, with empty states, closing out CONSOLIDATION_PLAN's original "mini-M7 = Progress
+page + empty states" fast-path target. Full rationale (including a couple of real bugs
+hit and fixed along the way — an SDL backtick-in-description gotcha, a CedarJS gqlorm
+type-name collision, a jsdom `matchMedia` guard) is in DECISIONS.md's "M7 — Polish"
+section. Verified: 27/27 api test suites (241 tests) + 12/12 web suites (25 tests)
+passing, both type-checks and lint clean.
 
-## Phase F — fast-path cut line (recommended for "get it done")
+**Still open from this phase:** none blocking — this was the last web/api-side gap
+besides M5.
 
-To ship for folio + friends soonest, the cut is:
+## Phase 5 (M6) — Mobile ✅ done (in the separate `trainfuel-mobile` repo)
 
-**Ship = Phase 0 → M2.5 → M3 → mini-M7 (Progress page + empty states) → deploy.**
+Per SPEC.md §2's decision to keep mobile out of this monorepo (Expo's React 19/
+TypeScript ~6 requirement conflicts with this repo's React 18/TypeScript 5.9 pin —
+see DECISIONS.md "Mobile bearer auth (foundation for M6)"), M6 shipped entirely in
+[`trainfuel-mobile`](https://github.com/ad0maa/trainfuel-mobile), not here:
 
-Defer past launch: M4 (Hevy — built, but needs a real Hevy Pro sub/key to actually
-exercise), M5 (Calendar — needs a Google Cloud consent screen), M6 (Mobile — needs an
-Apple dev account + dev build; the web app is responsive enough for friends' phones
-in the meantime). All three are additive and none block the core loop.
+- **This repo's contribution:** two additive backend endpoints on `feature/mobile-app`
+  (merged to `main` via PR #5) — `foodByBarcode` (SPEC.md §4.4's OFF barcode flow,
+  deferred since M2) and `syncHealthSamples` (SPEC.md §4.5's HealthKit ingestion,
+  dedup on HealthKit UUID, folding `BODY_MASS` samples into `DailyMetric.weightKg`).
+  No schema migration needed — both models existed since M0.
+- **`trainfuel-mobile`'s own build** (its PR #1): Today/tick, Diary, Activities, Plan,
+  and Settings screens with Expo Router; recent/frequent quick-log (no backend change
+  needed — `searchFoods` already returned it, mobile just hadn't surfaced it); an
+  offline mutation queue (`@react-native-async-storage/async-storage`); local
+  notifications for meds/supps/session reminders (`expo-notifications`); real barcode
+  scan → `foodByBarcode` lookup; HealthKit weight/active-energy sync → `syncHealthSamples`;
+  and the Cyan Steel design system (NativeWind mapping) applied throughout. Auth is a
+  `mobileLogin` bearer-token flow against the same `hashedPassword`/`salt` dbAuth
+  already writes (see that repo's README for the full architecture table).
+- **Still open:** HealthKit requires a real `expo-dev-client` build against a real
+  Apple Developer account (owner checklist #7) — the sync code exists and is wired,
+  but per SPEC.md §2 hasn't been exercised on a real device/entitlement yet. No
+  refresh-token rotation on the 30-day mobile bearer token (deferred, not forgotten,
+  per DECISIONS.md).
 
-Friends-usable also means **hosting becomes the real blocker** (open item #2):
-Postgres + a long-lived process for jobs/webhook → Fly/Render/VPS + managed Postgres
-(Neon fits; `@prisma/adapter-pg` already host-portable by design). Decide at M3 time —
-the Strava webhook needs the public URL.
+## Phase 6 — remaining SPEC milestone
+
+- **M5 Google Calendar** (push/patch/delete, reminder offsets, nightly reconcile) —
+  the only milestone left unbuilt from SPEC.md's M0–M7 ladder. Blocked on owner
+  checklist #6 (a Google Cloud project + OAuth consent screen); "testing" publish
+  status is fine per SPEC.md §10. Per Phase 2's note, follow the web-owned-redirect
+  OAuth pattern established for Strava/Hevy here, not SPEC's original "REST callback"
+  assumption. No job runner exists yet for the nightly reconcile job — same
+  fire-and-forget gap M1/M3/M4 already left open; decide alongside a real hosting-
+  platform scheduled-job mechanism if this becomes a live pain point (Vercel is
+  already the deploy target — see Phase 2's note — so a Vercel Cron Job is the most
+  likely fit).
+
+## Phase F — fast-path cut line (superseded — the ship line was crossed and then some)
+
+Original goal: **Ship = Phase 0 → M2.5 → M3 → mini-M7 (Progress page + empty
+states) → deploy.** That line was crossed at M3 (deployed to Vercel, public repo,
+real users hit it — see DECISIONS.md "Post-deploy fixes"), and everything originally
+deferred past it (M4 Hevy, M6 Mobile, full M7) has since shipped too. Only M5
+(Calendar) remains, and it was never on the fast-path's critical line to begin with —
+picking it up now is a "keep going," not a "reopen a cut corner."
 
 ---
 
 ## Owner checklist (things only a human can do)
 
-| # | Item | Blocks |
+| # | Item | Status |
 |---|---|---|
-| 1 | Run `yarn cedar test` once locally (consent for test-DB reset) | Phase 0 |
-| 2 | Register a Strava API application (client id/secret, callback domain) | M3 |
-| 3 | Choose hosting + provision Postgres; set the public webhook URL | M3 launch |
-| 4 | Real product name (or ship as TrainFuel) | M7/deploy |
-| 5 | Hevy Pro + API key | M4 (built, not yet exercised against a real account) |
-| 6 | Google Cloud project + OAuth consent screen | M5 (deferred) |
-| 7 | Apple Developer account (HealthKit entitlement) | M6 (deferred) |
+| 1 | Run `yarn cedar test` once locally (consent for test-DB reset) | ✅ done (Phase 0) |
+| 2 | Register a Strava API application (client id/secret, callback domain) | ⬜ still open as of the last deploy check (Settings showed "Strava isn't configured on this deployment yet") — **confirm if this has been done since**, it's the one item this file can't verify from git alone |
+| 3 | Choose hosting + provision Postgres; set the public webhook URL | ✅ done — deployed to Vercel, repo public at github.com/ad0maa/trainfuel, real users hit it in production (see DECISIONS.md "Post-deploy fixes") |
+| 4 | Real product name (or ship as TrainFuel) | ⬜ still shipping as "TrainFuel" placeholder |
+| 5 | Hevy Pro + API key | ⬜ still open — M4's integration is fully built and tested against Hevy's live API contract, but never exercised against a real account |
+| 6 | Google Cloud project + OAuth consent screen | ⬜ still open — **blocks M5**, the only remaining milestone |
+| 7 | Apple Developer account (HealthKit entitlement) | ⬜ still open — M6 shipped (see Phase 5) with HealthKit sync code wired, but it needs a real `expo-dev-client` build against a real entitlement to actually exercise on-device |
 
-## DECISIONS.md entries to write as we go
+## DECISIONS.md entries written so far (all ✅, historical record)
 
 - Phase mapping `base/peak → REBUILD/BUILD` (no enum extension) + Monday-anchor +
-  07:00 local default start time for generated sessions.
+  07:00 local default start time for generated sessions. ("M2.5 — Plan generator")
 - Plan generator ported from the `health` repo's Django implementation (provenance
-  note + what was dropped: Plan/PlanWeek/PlanSession models, fuzzy dedup).
-- `weeklyWeightDeltaKg` clamp values.
-- Background-job mechanism chosen for M3 (Cedar jobs vs node-cron).
-- Backfill window (30 days per SPEC, diverging from donor's full history).
+  note + what was dropped: Plan/PlanWeek/PlanSession models, fuzzy dedup). ("M2.5")
+- `weeklyWeightDeltaKg` clamp values — implemented in the "Missing Profile UI"
+  post-deploy fix, not M2.5 itself (that phase needed no schema/write-path change).
+- Backfill window (30 days per SPEC, diverging from donor's full history). ("M3")
+- App-shell/theme/Level-2-macros/Progress-page decisions. ("M7 — Polish")
+
+**Not yet written to DECISIONS.md** (shipped on other branches/repos without a
+matching write-up here — a gap, not a blocker):
+- Background-job mechanism for M3/M4/M5's fire-and-forget gaps — never actually
+  resolved; still an open design question whenever a real scheduler gets picked.
+- The `feature/mobile-app` branch's `foodByBarcode`/`syncHealthSamples` additions
+  (Phase 5) have no DECISIONS.md section in this repo.
+- `trainfuel-mobile`'s own build decisions live only in that repo's README.md/
+  CLAUDE.md, not here — worth cross-linking if this file is meant to be the single
+  status source of truth going forward.
