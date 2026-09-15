@@ -743,6 +743,10 @@ ol {
   align-items: center;
 }
 
+.tf-unmatched-activity-trigger {
+  margin-top: var(--tf-space-sm);
+}
+
 /* ---- Badges & pills ------------------------------------------------------ */
 
 .tf-item-type,
