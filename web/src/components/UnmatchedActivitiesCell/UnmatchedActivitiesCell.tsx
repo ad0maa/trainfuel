@@ -189,7 +189,11 @@ function ActivityRow({ activity }: { activity: Activity }) {
           </button>
         </form>
       ) : (
-        <button type="button" onClick={() => setLinking(true)}>
+        <button
+          type="button"
+          className="tf-unmatched-activity-trigger"
+          onClick={() => setLinking(true)}
+        >
           Link to a session
         </button>
       )}
