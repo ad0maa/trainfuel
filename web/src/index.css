@@ -653,6 +653,10 @@ ol {
   margin-bottom: var(--tf-space-3xl);
 }
 
+.tf-plan-actions {
+  margin-top: var(--tf-space-sm);
+}
+
 .tf-week-nav {
   display: flex;
   align-items: center;
@@ -730,7 +734,8 @@ ol {
   flex-wrap: wrap;
 }
 
-.tf-unmatched-activity form {
+.tf-unmatched-activity form,
+.tf-move-form {
   display: flex;
   gap: var(--tf-space-sm);
   margin-top: var(--tf-space-sm);

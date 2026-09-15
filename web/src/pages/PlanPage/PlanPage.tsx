@@ -38,7 +38,9 @@ const PlanPage = () => {
       <section className="tf-plan-section">
         <h2>Blocks</h2>
         <TrainingBlocksCell />
-        <GenerateTrainingPlanForm />
+        <div className="tf-plan-actions">
+          <GenerateTrainingPlanForm />
+        </div>
       </section>
 
       <section className="tf-plan-section">
