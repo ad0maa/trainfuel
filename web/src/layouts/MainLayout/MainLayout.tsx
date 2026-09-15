@@ -34,28 +34,28 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               <NavLink
                 to={routes.home()}
                 className="tf-sidebar-link"
-                activeClassName="tf-sidebar-link-active"
+                activeClassName="tf-sidebar-link tf-sidebar-link-active"
               >
                 <span className="tf-sidebar-icon">◎</span>Today
               </NavLink>
               <NavLink
                 to={routes.plan()}
                 className="tf-sidebar-link"
-                activeClassName="tf-sidebar-link-active"
+                activeClassName="tf-sidebar-link tf-sidebar-link-active"
               >
                 <span className="tf-sidebar-icon">▤</span>Plan
               </NavLink>
               <NavLink
                 to={routes.foodLog()}
                 className="tf-sidebar-link"
-                activeClassName="tf-sidebar-link-active"
+                activeClassName="tf-sidebar-link tf-sidebar-link-active"
               >
                 <span className="tf-sidebar-icon">☷</span>Food Log
               </NavLink>
               <NavLink
                 to={routes.progress()}
                 className="tf-sidebar-link"
-                activeClassName="tf-sidebar-link-active"
+                activeClassName="tf-sidebar-link tf-sidebar-link-active"
               >
                 <span className="tf-sidebar-icon">📈</span>Progress
               </NavLink>
@@ -68,14 +68,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               <NavLink
                 to={routes.bmiCalculator()}
                 className="tf-sidebar-link"
-                activeClassName="tf-sidebar-link-active"
+                activeClassName="tf-sidebar-link tf-sidebar-link-active"
               >
                 <span className="tf-sidebar-icon">⚖</span>BMI calculator
               </NavLink>
               <NavLink
                 to={routes.tdeeCalculator()}
                 className="tf-sidebar-link"
-                activeClassName="tf-sidebar-link-active"
+                activeClassName="tf-sidebar-link tf-sidebar-link-active"
               >
                 <span className="tf-sidebar-icon">🔥</span>TDEE calculator
               </NavLink>
@@ -86,7 +86,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <NavLink
               to={routes.settings()}
               className="tf-sidebar-link"
-              activeClassName="tf-sidebar-link-active"
+              activeClassName="tf-sidebar-link tf-sidebar-link-active"
             >
               <span className="tf-sidebar-icon">⚙</span>Settings
             </NavLink>
