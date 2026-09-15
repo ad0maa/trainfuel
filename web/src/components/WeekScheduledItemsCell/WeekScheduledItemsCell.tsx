@@ -107,6 +107,7 @@ function ItemRow({ item }: ItemRowProps) {
       <div className="tf-week-item-actions">
         {editing ? (
           <form
+            className="tf-move-form"
             onSubmit={(e) => {
               e.preventDefault()
               const form = e.currentTarget
